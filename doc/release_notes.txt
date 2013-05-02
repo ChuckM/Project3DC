@@ -1,0 +1,164 @@
+Project: 3D Craft -- Release Notes
+
+Copyright (c) 1999 Chuck McManis, All Rights Reserved.  $Id:$
+
+
+Release notes for Project: 3D Craft in inverse order.
+
+Thursday 11-Nov-99
+	Fixes: Transparency works again (it worked
+	in G3D before P3DC but had been neglected)
+	Cameras are _much_ better and easier to use
+	and I really think I understand them this
+	time, really!
+
+	Features: new cameras, more docs on them,
+	a couple of new test programs.
+
+Sunday 31-Oct-99
+	Fixes: Hmmm, I don't recall. Actually I
+	changed the orientation transform function
+	to take an up vector. That was necessary and
+	whacked 'point_{model|camera}' to be generic
+	orientation functions for models and cameras
+	with direction, up, and twist. 
+
+	Features: I've been rewhacking the camera interfaces
+	since they sucked. There is some redunancy at the
+	moment between p3dc_set_camera(...) and the various
+	property setting functions (like set zclip, etc) but
+	that will be resolved shortly.
+
+	I don't know why the varargs stuff won't pass a 
+	p3dc_FLOAT directly and insists on a pointer to
+	one. If I can fix that I'll remove the pointer
+	requirement as it is stupid. In the meantime the
+	various setting functions will become #defines
+	in the header file. 
+
+	Additional documentation is available in the
+	p3dc_CMRA.html file. 
+
+	SceneTest has been updated to include a camera
+	model that shows where and how the camera following
+	the plane is oriented. Its kind of neat. The
+	keys 'f' and 'c' have been used to control setting
+	the "near" clip plane on the user camera, that blue
+	border you see is the edges of the camera model
+	that is sitting there. Press 'f' momentarily and
+	it will go away. Press 'c' and you can set the near
+	plane to be _inside_ the camera model and get a 
+	blank red screen :-)
+
+	I need to rip out the comments in the camera.c
+	file for view and perspective computations and
+	rewrite them to be accurate.
+
+Wednesday 22-Sept-99
+	Fixes: The rotation transforms were completely
+	bogus. Apparently I did a lousy job of converting
+	from row major to column major form. Anyway, their
+	fixed now, new test in tests called xfrm01.
+
+	Features: Added camera pitch, roll, and yaw interfaces
+	that appear to work. I still need to optimize them.
+	This probably isn't the final interface. Added the
+	ability to "look around" in the Scenetest demo using 
+	the plane's camera. 
+
+Sunday 19-Sept-99
+    Fixes: Several fixes have gone into this release, in
+	particular a nasty bug where the clipping code 
+	could hang if it got a poorly formed list. This
+	list type wasn't being initialized in copy_model
+	which caused some models to have bogus list types
+	in their vertex or normal lists.
+
+    Features:
+
+      - SceneTest is included in this release. It
+	uses GetAsyncKeyState which is very Win specific
+	(:-() but it is smoother as a result. 
+	
+      - Added a new model type "planet" that can be
+	easily texture mapped by a 2:1 ration texture.
+	See Scenetest for Earth and moon models.
+
+      - Added a new model generating utility on the UNIX
+	side "planet.c" which generated the planet model.
+
+      - Draw model now clips the model based on its bounding
+	box which speeds things up when the model is fully on
+	or off the screen.
+
+    To do:
+
+      - I still need to fix cameras to note changes internally.
+        I am planning a 'roll/pitch/yaw' interface to cameras
+        that mimics the same interface in models. 
+      - Also attaching a camera to a vertex for easier placement
+	in model space. (See how scenetest does it for the yucky
+	version)
+      - Light map textures are probably next or perhaps a BSP
+	function for holding "environments." 
+      - Orient model to surface plane. For moving models along a
+	surface. The demo for this is probably tanks over a
+	simulated terrain. May need support in the model for this
+	as well.
+
+Sunday 12-Sept-99
+
+I don't get as much time to work on this as I would like, sigh.
+
+Changes in this release are:
+    - The "sense" of the drawing flags is no reversed so setting
+      flags in the draw api turns on the full pipeline and you
+      have to manually disable things (like P3DC_DRAW_NOSHADE to
+      disable shading)
+    - The clipping and lighting of faces was rewritten because I
+      was leaking memory. There is a new function p3dc_memstats()
+      that will print out statistics for the allocator subsystem.
+      Normal operation is a bunch of forced mallocs early on and
+      then no forced mallocs after stabilization.
+    - The clipping rewrite also forced a change in the way the
+      'ancillary' list was handled in faces, it used to be a copy
+      of the internal lists, now it is an array of pointers to 
+      those lists. This makes it easier to manage.
+    - There is a simple benchmark in the UNIX side of the source
+      tree. I had a clipping benchmark but it got deleted during
+      a late night debug session and there was no back up. I will
+      re-create it soon as it was useful.
+Things I still need:
+    - More tests. Eventually I'd like to have a complete suite
+      of regression tests to insure that things that get changed
+      don't affect the code's function.
+    - More benchmarks. These help identify areas that could use
+      some optimization attention.
+    - Some complicated models, I'd like to get some very complex
+      models for use in various scenes.
+
+
+Wednesday 01-Sept-99
+
+This release is the first to actually have release notes as it is actually
+a new release.
+
+The big change in this release is that the structure and use of lists
+was completely revamped. See the p3dc_LIST.html page for more details
+but basically the red/black trees and the link list apis were folded
+into a single unified API. The new API is much more orthogonal and
+testable. I created three new test programs in the FreeBSD source
+tree:
+	list001 - Test creating a linked list and then removing its
+		contents and putting them on to another list.
+	list002 - Test creating a sorted (red/black) list, then removing
+		its contents and putting them on another list.
+	list003 - Create a bigger red/black list and remove likely
+		troublesome nodes.
+
+Still to do is to work on some benchmark tests and then automate a
+regression suite based on the output of the test vs the expected
+output.
+
+
+

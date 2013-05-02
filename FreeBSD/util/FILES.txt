@@ -1,0 +1,8 @@
+Various utility files, these generate models
+automagically.
+
+cone.c - generate a cone
+cyl.c - generate a cylinder
+sphere.c - generate a sphere (get the pattern?) 
+checkerbox.c - checkerbox 
+

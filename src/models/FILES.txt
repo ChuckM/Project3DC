@@ -1,0 +1,4 @@
+These are files containing model descriptions. This is also the repository
+for the "default" models file. See the documentation for details.
+--Chuck McManis
+August 16, 1999

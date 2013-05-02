@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- List data structures</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Lists and Nodes</h1>
+
+<p>This page describes the lists used in P3DC. Lists are used
+everywhere to hold collections of things like vertices, polygons,
+clip results, etc. A lot of people have suggested that arrays are
+faster than linked lists in the rendering part of the engine and
+they are probably right, but lists give me some flexibility that
+I really like so I forego the speed advantage of arrays.</p>
+
+<p>There are two parts to this page:</p>
+
+<ul>
+    <li><a href="#LISTDESIGN">List Architecture and Design</a></li>
+    <li><a href="#LISTAPI">List Constants and Programming
+        Interface</a><ul>
+            <li><a href="#CONSTANTS">Constants</a></li>
+            <li><a href="#API">Programming Interface</a><ul>
+                    <li><a href="#p3dc_init_list"><em>p3dc_init_list</em></a></li>
+                    <li><a href="#p3dc_new_list"><em>p3dc_new_list</em></a></li>
+                    <li><a href="#p3dc_free_list"><em>p3dc_free_list</em></a></li>
+                    <li><a href="#p3dc_add_node"><em>p3dc_add_node</em></a></li>
+                    <li><a href="#p3dc_remove_node"><em>p3dc_remove_node</em></a></li>
+                    <li><a href="#p3dc_get_node"><em>p3dc_get_node</em></a></li>
+                    <li><a href="#p3dc_new_node"><em>p3dc_new_node</em></a></li>
+                    <li><a href="#p3dc_free_node"><em>p3dc_free_node</em></a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<hr>
+
+<h2><a name="LISTDESIGN"><strong>List Architecture and Design</strong></a></h2>
+
+<p>As I started writing the documentation on lists I realized
+they are in a complete jumble. This situation occured because
+lists were half written at the beginning of the project and then
+added to at the end of the project. I've concluded I need two
+lists and types for each. These are:</p>
+
+<ul>
+    <li>LINKED -- best performance (default)</li>
+    <li>SORTED -- Searchable by 'name.'</li>
+</ul>
+
+<p>Then there are the methods on lists, we know there are:</p>
+
+<ul>
+    <li>new -- allocate a new empty list</li>
+    <li>free -- de-allocate a possibly non-empty list</li>
+    <li>init -- initialize a new list to be empty</li>
+    <li>add -- Add a node to a list:<ul>
+            <li>HEAD (at the front)</li>
+            <li>TAIL (at the end of the list)</li>
+            <li>BYNAME (sorted insertion)</li>
+            <li>AFTER a given node.</li>
+            <li>BEFORE a given node.</li>
+        </ul>
+    </li>
+    <li>remove -- Remove a node from the list<ul>
+            <li>FIRST -- first node on the list. (equivalent to a
+                'pop' operation)</li>
+            <li>LAST -- last node on the list (good for creating
+                FIFO lists)</li>
+            <li>THIS -- When you have the list in hand and want
+                it removed.</li>
+            <li>BYNAME -- Identified by a given name.</li>
+            <li>BYDATA -- Identified by the data pointer it is
+                holding.</li>
+        </ul>
+    </li>
+    <li>get -- Find a node on this list<ul>
+            <li>FIRST -- return the first node on the list.</li>
+            <li>LAST -- return the last node on the list</li>
+            <li>NEXT -- return the next node relative to the one
+                returned last time.</li>
+            <li>PREVIOUS -- return the previous node relative to
+                the one returned last time.</li>
+            <li>BYNAME -- return the node on the list associated
+                with this name.</li>
+            <li>BYDATA -- return the node on the list that is
+                &quot;holding&quot; a pointer to this data.</li>
+            <li>CURRENT -- return the same node returned last
+                time.</li>
+        </ul>
+    </li>
+</ul>
+
+<p>List invariants we want to enforce:</p>
+
+<ol>
+    <li>A node lives on exactly one list. (node-&gt;owner ==
+        list)</li>
+    <li>A list with a specified type has only nodes of that type
+        on it. (node-&gt;data.t == list-&gt;n_type)</li>
+    <li>Nodes in use do not appear on the free list.</li>
+</ol>
+
+<hr>
+
+<h2><a name="LISTAPI"><font color="#000000">List Constants and
+Programming Interface</font></a></h2>
+
+<h3><a name="CONSTANTS"><font color="#000000">Constants</font></a></h3>
+
+<blockquote>
+    <p><font color="#000000">Positioning nodes on lists with <em>p3dc_add_node
+    </em>(type is </font><font color="#000000" face="Courier New">p3dc_NODE_POSITION</font><font
+    color="#000000">)</font></p>
+    <ul>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_HEAD
+            </strong></font>-- Node is added to the head of the
+            list.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_TAIL</strong></font>--
+            Node is added to the tail (end) of the list.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_BEFORE</strong></font>--
+            Node is added to the list ahead of the passed in
+            node.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_AFTER</strong></font>--
+            Node is added to the list after the passed in node..</li>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_BYNAME</strong></font>--
+            Node is added to the searchable list based on its
+            &quot;name&quot;.</li>
+    </ul>
+    <p><font color="#000000">Types of lists supported (type is </font><font
+    color="#000000" face="Courier New">p3dc_LIST_TYPE</font><font
+    color="#000000">)</font></p>
+    <ul>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_LINKED</strong></font>
+            -- List is a standard linked list.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_LIST_SORTED</strong></font>
+            -- List is a binary search tree (Red-Black tree).</li>
+    </ul>
+    <p><font color="#000000">Locations where nodes can be gotten
+    or removed (type is </font><font color="#000000"
+    face="Courier New">p3dc_NODE_LOCATION</font><font
+    color="#000000">)</font></p>
+    <ul>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_CURRENT
+            </strong></font>-- Use the same node that was
+            returned last time.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_FIRST
+            </strong></font>-- Use the first node on the list.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_NEXT</strong></font>
+            -- Use the node after the last one that was used.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_LAST</strong></font>
+            -- Use the last node on the list.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_PREVIOUS</strong></font>
+            -- Use the node previous to the last one that was
+            used.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_BYNAME
+            </strong></font>-- Use the node with the given name.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_BYDATA
+            </strong></font>-- Use the node holding the given
+            data pointer.</li>
+        <li><font color="#000000" size="2"><strong>P3DC_NODE_THIS</strong></font>
+            -- Use the node that was passed in.</li>
+    </ul>
+</blockquote>
+
+<h3><a name="API">List Programming Interface</a></h3>
+
+<p><font color="#000000"><em>void</em> </font><a
+name="p3dc_init_list"><font color="#000000"><strong>p3dc_init_list</strong></font></a><font
+color="#000000"><strong>( </strong><em>p3dc_LIST *list, p3dc_TYPE
+n_type, p3dc_LIST_TYPE l_type </em><strong>)</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">Initialize the list pointed to by <em>list</em>
+    to have hold only type <em>n_type</em> nodes. (if<em> n_type</em>
+    is set to </font><font color="#000000" size="2"><strong>P3DC_TYPE_UNKNOWN</strong></font><font
+    color="#000000"> then the list can hold any type. The type of
+    list (sorted or linked) is specified by <em>l_type</em>. </font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_LIST *</em></font><a
+name="p3dc_new_list"><font color="#000000"><strong>p3dc_new_list</strong></font></a><font
+color="#000000"><strong>( </strong><em>p3dc_TYPE n_type,
+p3dc_LIST_TYPE l_type </em><strong>)</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">Allocate a list, initialize it, and
+    return a pointer to it. As with <em>p3dc_init_list</em> the
+    value in <em>n_type</em> sets the types of nodes allowed on
+    the list and the value in <em>l_type</em> sets the type of
+    list to either sorted or linked.</font></p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_free_list"><strong>p3dc_free_list</strong></a><strong>(
+</strong><em>p3dc_LIST *list</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>Free a list and the nodes that are on it. This is kind of
+    a wart since <em>p3dc_new_list</em> only allocates an empty
+    list and this function frees nodes and lists but it didn't
+    seem worth architectural &quot;purity&quot; to have a <em>p3dc_empty_list</em>
+    that only freed the nodes and then this function to free the
+    list object itself.</p>
+</blockquote>
+
+<p><font color="#000000"><em>int</em> </font><a
+name="p3dc_add_node"><font color="#000000"><strong>p3dc_add_node</strong></font></a><font
+color="#000000"><strong>( </strong><em>p3dc_LIST *list, p3dc_NODE
+*node, p3dc_NODE_LOCATION where, ... </em><strong>)</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">This function adds the node
+    referenced by <em>node</em> to the list referenced by <em>list</em>.
+    The value in <em>where</em> tells the function if you want
+    the node added to the end, beginning, by name etc. If the <em>where</em>
+    parameter requires an argument it is passed after <em>where</em>.
+    (currently the locations </font><font color="#000000"
+    size="2"><strong>P3DC_LIST_BYNAME</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_LIST_BEFORE</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_LIST_AFTER</strong></font><font
+    color="#000000"> require arguments.)</font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_NODE * </em></font><a
+name="p3dc_remove_node"><font color="#000000"><strong>p3dc_remove_node</strong></font></a><font
+color="#000000"><strong>( </strong><em>p3dc_LIST *list,
+p3dc_NODE_POSITION where, ... </em><strong>)</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">This function removes a node from
+    the list referenced by <em>list</em>. The value in <em>where</em>
+    tells the function which node to remove. For some values of <em>where</em>
+    an argument is required and that argument is passed after the
+    <em>where</em> parameter. (currently the positions </font><font
+    color="#000000" size="2"><strong>P3DC_NODE_BYNAME</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_NODE_THIS</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_NODE_BYDATA</strong></font><font
+    color="#000000"> require arguments.) The node removed is
+    actually returned so you can use it on another list or free
+    it if you choose.</font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_NODE * </em></font><a
+name="p3dc_get_node"><font color="#000000"><strong>p3dc_get_node</strong></font></a><font
+color="#000000"><strong>( </strong><em>p3dc_LIST *list,
+p3dc_NODE_POSITION where, ...</em><strong> )</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">This function is used to retrieve
+    nodes from the list, but leave them on the list. After it is
+    called the node returned is set as the <em>current</em></font>
+    node. The position of the node is identified by the <em>where</em>
+    parameter. For some values of the <em>where</em> parameter an
+    argument is required. <font color="#000000">(currently the
+    positions </font><font color="#000000" size="2"><strong>P3DC_NODE_BYNAME</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_NODE_CURRENT</strong></font><font
+    color="#000000">, </font><font color="#000000" size="2"><strong>P3DC_NODE_BYDATA,
+    P3DC_NODE_BEFORE</strong></font>, and<font color="#000000"
+    size="2"><strong> P3DC_NODE_AFTER </strong></font><font
+    color="#000000">require arguments.)</font></p>
+</blockquote>
+
+<p><font color="#000000"><em>void </em></font><a
+name="p3dc_new_node"><font color="#000000"><strong>p3dc_new_node</strong></font></a><font
+color="#000000"><strong>( </strong><em>void *payload, char *name</em>,
+<em>int flags </em><strong>) </strong></font></p>
+
+<blockquote>
+    <p><font color="#000000">This function allocates a new node,
+    and gives it <em>payload</em> to carry. If <em>name</em> is
+    non-null it is used as the node's name and the value in <em>flags</em>
+    can be either 0 or </font><font color="#000000" size="2"><strong>P3DC_NODE_FREEPAYLOAD</strong></font><font
+    color="#000000"> which affects whether or not the library
+    trys to free the node's payload when it frees the node. If
+    this flag is not set you are responsible for freeing the
+    payload if it is allocated from the heap.</font></p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_free_node"><strong>p3dc_free_node</strong></a><strong>(
+</strong><em>p3dc_NODE *node </em><strong>) </strong></p>
+
+<blockquote>
+    <p>This function will free a node, if the node was created
+    with the flag <font size="2"><strong>P3DC_NODE_FREEPAYLOAD</strong></font>
+    set then the payload will also be freed. <strong>NOTE:</strong>
+    if the name is non-null it will also be freed so don't leave
+    a char pointer in there by mistake. When you allocated the
+    node if you gave it a name the name was strdup'd here and
+    freeing it is the right thing to do.</p>
+</blockquote>
+</body>
+</html>

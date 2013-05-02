@@ -1,0 +1,27 @@
+#
+# This is a simple model for the clipping benchmark
+#
+# This model defines two faces, one is a triangle and one is
+# a hexagon. 
+#
+# The triangle is red, centered at the origin and lies on
+# the XY plane.
+# The hexagon is green, centered at the origin and lies -0.1
+# units above the XY plane.
+#
+model tri {
+	color triangle = 255, 0, 0 ;
+	color hexagon = 0, 255, 0;
+	origin 0, 0.0, 0;
+	vertex tv1 = 0, 3.0, 0;
+	vertex tv2 = -3.0, -3.0, 0.0;
+	vertex tv3 =  3.0, -3.0, 0.0;
+	vertex hv1 = -2.0, 1.0, -0.1;
+	vertex hv2 = 0, 3, -0.1;
+	vertex hv3 = 2, 1, -0.1;
+	vertex hv4 = 2, -1, -0.1;
+	vertex hv5 = 0, -3, -0.1;
+	vertex hv6 = -2, -1, -0.1;
+	face (triangle) tv1, tv2, tv3;
+	face (hexagon) hv6, hv5, hv4, hv3, hv2, hv1;
+}

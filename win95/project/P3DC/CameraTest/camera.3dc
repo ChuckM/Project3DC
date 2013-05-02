@@ -1,0 +1,66 @@
+#
+# This is a model of a movie camera
+# I place it in the scene where a camera exists
+# to help me see what it sees.
+#
+model camera {
+	origin 0, 0, 0 ;
+	color base = 0, 255, 255; 
+	color lens = 0, 0, 255;
+	color red = 225, 0, 0;
+#
+# basic box
+#	
+	v v1 = -1.5, 1.5, -1.5 ;
+	v v2 = -1.5, 1.5, 1.5 ;
+	v v3 = 1.5, 1.5, 1.5 ;
+	v v4 = 1.5, 1.5, -1.5 ;
+	v v5 = -1.5, -1.5, -1.5 ;
+	v v6 = -1.5, -1.5, 1.5 ;
+	v v7 = 1.5, -1.5, 1.5 ;
+	v v8 = 1.5, -1.5, -1.5 ;
+#
+# lens vertices
+#
+	v lv1 = -0.25,  0.25, 1.5;
+	v lv2 =  0.25,  0.25, 1.5;
+	v lv3 =  0.25, -0.25, 1.5;
+	v lv4 = -0.25, -0.25, 1.5;
+	v lv5 = -1.5,   0.75, 2.5;
+	v lv6 =  1.5,   0.75, 2.5;
+	v lv7 =  1.5,  -0.75, 2.5;
+	v lv8 = -1.5,  -0.75, 2.5;
+
+#
+# Define the body
+#
+	face (base) v4, v3, v2, v1;
+	face (red) v1, v2, v3, v4;
+	face (base) v5, v6, v7, v8;
+	face (red) v8, v7, v6, v5;
+
+	face (base) v1, v2, v6, v5;
+	face (red) v5, v6, v2, v1;
+
+	face (base) v3, v4, v8, v7;
+	face (red) v7, v8, v4, v3;
+
+	face (base) v1, v5, v8, v4;
+	face (red) v4, v8, v5, v1;
+
+	face (base) v2, v3, v7, v6;
+	face (red) v6, v7, v3, v1;
+
+#
+# Define the "lens"
+#
+	face (lens) lv1, lv2, lv6, lv5;
+	face (red) lv5, lv6, lv2, lv1;
+	face (lens) lv2, lv3, lv7, lv6;
+	face (red) lv6, lv7, lv3, lv2;
+	face (lens) lv3, lv4, lv8, lv7;
+	face (red) lv7, lv8, lv4, lv3;
+	face (lens) lv4, lv1, lv5, lv8;
+	face (red) lv8, lv5, lv1, lv4;
+}
+

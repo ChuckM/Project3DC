@@ -1,0 +1,104 @@
+From:
+                                                                Wed 11:04 PM
+Subject: Re: Nuts
+
+On Tue, 19 Oct 1999 22:31:09 -0700, Chuck McManis
+<cmcmanis-delete-this@mcmanis.com> wrote:
+
+>Ok, this is driving me nuts. And I even got out my tinkertoys to
+>visualize it!
+>
+There are several levels on which you are driving yourself nuts.
+
+>The background is that I'm implementing all of the viewing systems from
+>Watt and of course started with Viewing System I which uses polar
+>co-ordinates and a scalar to represent the view point (which always
+>looks toward the world origin.)
+>
+>Now if view system consists of a rotation about Y and a rotation about
+>X,
+
+A view system does not consist of a rotation about Y and a rotation
+about X.  A view system is a frame, defined by an origin and an
+ordered set of three orthonormal vectors.  No particular rotations
+about coordinate axes are implied by the view system. And in fact, you
+CANNOT construct Watt's view system by rotations and translations
+alone, because he uses a right-handed world system and a left-handed
+view system.  Rotations and translations preserve handedness, so you
+know you have to use reflections as well to construct a handedness
+reversing transformations  from elementary affine transformations--
+rotations and translations  alonewon't do the job for Watt.
+
+>the point '5, 5, 5' in cartesian space ends up being a 45 degree
+>rotation and a 54.74 degree rotation and a scalar equal to sqrt(75).
+
+Ummm, the point with cartesian coordinates (5, 5, 5) has polar
+coordinates (sqrt(75), 45 degrees, 54.74 degrees) but it makes no
+sense whatever to say that a point "ends up being a sequence of
+rotations".  Rotations are mappings of the space; each given rotation
+maps all the points, all the axes to (generally) other points and
+other axes.   A point alone, no matter what coordinate representation
+you use for it, does not define any rotations, without additional
+implied data.  If you have a partcular mechanical setup, such as a
+telescope with an azimuth-altitude mounting, then a particular
+sequence of rotations for pointing it at any point of the celestial
+sphere is implied, but in general, a point on the sphere does not in
+itself define any rotations.
+
+>But
+>why it isn't simply two 45 degree rotations is driving me nuts.
+>
+
+OK you are trying to rotate the vector (0, 0, 1) so that it points in
+the direction from (0,0,0) to (5, 5, 5) (or the negative of that,
+depending on how you are going to insert the needed reflection
+mentioned above).  There are infinitely many rotations of the space
+that will map (0,0,1) to the direction if (5,5,5).  One of them, the
+one with the smallest rotation angle,  is the rotation through 54.74
+degrees about an axis that is perpendicular to the plane containing
+(0,0,1) and (5, 5, 5) and (0,0,0).  That is the angle between these
+two vectors.  You are free to drive yourself nuts over why this angle
+between these two vectors is not  45 degrees, but in fact it is not.
+
+ You are misleading yourself into thinking  it should be 45 degrees by
+some kind of fallacious symmetry thoughts.  Here's the correct
+symmetry argument.  The unit vector that points from the origin to
+(5,5,5) is (1/sqrt(3), 1/sqrt(3), 1/sqrt(3)).   Certainly by symmetry
+this vector makes the same angle with each of the three coordinate
+axes, namely
+acos(1/sqrt(3)) = 54 degrees.  The vector makes a 54 degree angle with
+the Xworld and Yworld, as well as with Zworld.    Why should that
+drive you nuts?  Symmetry tells you the angle with each axis must be
+the same. The Pythagorean theorem tells you it must be
+acos(1/sqrt(3)).     The projection of that vector to the
+Xworld-Yworld plane makes a 45 degree angle with each of the Xworld
+and Yworld axes, and a 90 degree angle with the Zworld axis -- why
+should that drive you nuts?  See how you have broken the symmetry.
+
+So, for whatever reasons (probably not good ones)  you have chosen to
+construct an Euler rotation to map (0,0,1) to (1,1,1)/sqrt(3) by first
+rotating about Zworld to map Xworld to the axis perpendicular to the
+plane of Zworld and (1,1,1) (a 45 degree rotation), then rotating
+about that axis to bring (0,0,1) to (1,1,1)/sqrt(3) (a 54.74 degree
+rotation).
+
+>
+>Help me Ron, show me where I screwed up! and how to figure out the
+>impact of the first transformation on the results of the second.
+
+Once again, I think it is rather silly to be looking to construct the
+transformation to the new frame in terms of rotations about coordinate
+axes, the famous trap of Euler-angle thinking.   And this goes double
+when you are allowing a handedness change, as Watt is doing in his
+so-called "view systems".
+
+Ron
+***********************************************************
+Dorian Research, Inc.
+Berkeley, CA
+http://www.dorianresearch.com
+
+  "He's such an inefficient scoundrel that he
+   doesn't know the simplest motions of his craft"
+                             -- Gully Jimson
+************************************************************

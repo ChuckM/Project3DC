@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Vertices</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Vertices</h1>
+
+<p>This page describes vertices and their use in Project: 3D
+Craft. It is generally broken up into two sections, structure
+definition and the vertex API. Below are hot links to specific
+sections:</p>
+
+<ul>
+    <li><a href="#VERTEXDEF"><strong>Definition</strong></a></li>
+    <li><a href="#VERTEXAPI"><strong>Application Programming
+        Interface</strong></a><ul>
+            <li><a href="#p3dc_new_vrtx"><em>p3dc_new_vrtx</em></a></li>
+            <li><a href="#p3dc_free_vrtx"><em>p3dc_free_vrtx</em></a></li>
+            <li><a href="#p3dc_xfrm_vrtx"><em>p3dc_xfrm_vrtx</em></a></li>
+            <li><a href="#p3dc_dot_vrtx"><em>p3dc_dot_vrtx</em></a></li>
+            <li><a href="#p3dc_dot3_vrtx"><em>p3dc_dot3_vrtx</em></a></li>
+            <li><a href="#p3dc_cross_vrtx"><em>p3dc_cross_vrtx</em></a></li>
+            <li><a href="#p3dc_cross3_vrtx"><em>p3dc_cross3_vrtx</em></a></li>
+            <li><a href="#p3dc_unit_vrtx"><em>p3dc_unit_vrtx</em></a></li>
+            <li><a href="#p3dc_sub_vrtx"><em>p3dc_sub_vrtx</em></a></li>
+            <li><a href="#p3dc_add_vrtx"><em>p3dc_add_vrtx</em></a></li>
+            <li><a href="#p3dc_normal_vrtx"><em>p3dc_normal_vrtx</em></a></li>
+            <li><a href="#p3dc_scale_vrtx"><em>p3dc_scale_vrtx</em></a></li>
+        </ul>
+    </li>
+</ul>
+
+<p>As you will see below there are lots you can do with vertices
+but a comment that John Carmack of Id Software fame once made
+really stuck with me, it went something like:</p>
+
+<blockquote>
+    <p>&quot;One measure of 3-D coding is how fast the code can
+    transform the vertices, a measure of 3-D <em>design</em> is
+    how rarely those vertices need to be transformed.&quot;</p>
+</blockquote>
+
+<p>His point, which is as valid now as it was when he said this,
+is that the art of good 3-D programming is in not doing any work
+that you don't absolutely need to do.</p>
+
+<hr>
+
+<h2>V<a name="VERTEXDEF">ertex Definition -- <strong><tt>p3dc_VRTX</tt></strong></a></h2>
+
+<p>The most fundamental compound type in P3DC is the <strong>p3dc_VRTX</strong>
+structure. It has the following members;</p>
+<div align="left">
+
+<table border="1" cellpadding="2">
+    <tr>
+        <th align="left" bgcolor="#000000"><font color="#FFFFFF">Member</font></th>
+        <th align="left" valign="top" bgcolor="#000000"><font
+        color="#FFFFFF">Type</font></th>
+        <th align="left" bgcolor="#000000"><font color="#FFFFFF">Description</font></th>
+    </tr>
+    <tr>
+        <td valign="top" width="5%"><em>v</em></td>
+        <td valign="top">p3dc_PNT3</td>
+        <td>This is the vertex's position in the world. In many
+        engines this would be the only thing necessary but in
+        P3DC there are additional values that are computed by the
+        engine and tied to each vertex.</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%"><em>xid</em></td>
+        <td valign="top">unsigned short</td>
+        <td>The transform id, <em>xid</em>, identifies the last
+        transform used to transform this vertex. This is an <em>accellerator</em>
+        in that if the same vertex needs to be transformed again
+        by the same transform, the cached values are used and
+        many multiplies are saved.</td>
+    </tr>
+    <tr>
+        <td valign="top"><em>ccode</em></td>
+        <td valign="top">unsigned short</td>
+        <td valign="top">This value contains the <em>clipping
+        code</em> for the transformed vertex. When the vertex is
+        transformed, if it is transformed into &quot;view&quot;
+        space, meaning that <em>tv.w</em> is not equal to 1.0,
+        then the vertex transformation code computes the
+        &quot;out code&quot; for this vertex based on the x, y,
+        z, and w values in the <em>tv</em> member. For <em>x</em>
+        and <em>y</em>, values that are less than <em>-w</em> or
+        greater than <em>+w</em> will be clipped, and for <em>z</em>
+        values that are less than 0 or greater than <em>+w</em>
+        will be clipped. This information is stored in this
+        member as a clipping accellerator.</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%"><em>tv</em></td>
+        <td valign="top">p3dc_PNT4</td>
+        <td>This structure holds the <em>transformed</em> vertex.
+        This is a four element vector because the point may be
+        transformed into <em>homogenous</em> co-ordinates. (this
+        is done just prior to clipping). </td>
+    </tr>
+</table>
+</div>
+
+<p>Vertices are the fundamental point in P3DC, they define
+points, the endpoints of lines, and when they are co-planar they
+define a polygon or face. </p>
+
+<hr>
+
+<h2><a name="VERTEXAPI">Vertex Application Programming Interface</a></h2>
+
+<p>Vertices have a set of interfaces that are used to allocate,
+free, and manipulate them. These interfaces are described in this
+section of the document.</p>
+
+<p><em>p3dc_VRTX * </em><a name="p3dc_new_vrtx"><strong>p3dc_new_vrtx</strong></a><strong>(
+</strong><em>p3dc_FLOAT x, y, z </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function allocates a new vertex structure and
+    initializes it's <em>v</em> member to contain the values
+    passed in for <em>x</em>, <em>y</em>, and <em>z</em>. All
+    other members are cleared to zero.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_free_vrtx"><strong>p3dc_free_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX **vrtx_ptr </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function frees a vertex (see the discussion on memory
+    management for a more complete description). The freed vertex
+    is added to the free list for later re-use. Note that it gets
+    passed a pointer to a pointer, the pointer is set to NULL
+    after the vertex is freed.</p>
+</blockquote>
+
+<p><em>void</em> <a name="p3dc_xfrm_vrtx"><strong>p3dc_xfrm_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *res, p3dc_XFRM *xfrm, p3dc_VRTX *src</em><strong>
+)</strong></p>
+
+<blockquote>
+    <p>This function transforms the vertex referenced by <em>src</em>
+    by the transformation pointed to by <em>xfrm</em> (if the <em>xid</em>
+    member of <em>src</em> matches the <em>id</em> value of <em>xfrm</em>
+    then the cached values in <em>src-&gt;tv</em> are used
+    instead.) If the pointer <em>res</em> is not null, then
+    transformed values are copied into this vertex's
+    untransformed member <em>v</em>. You use this capability when
+    transforming from one co-ordinate space to another, like for
+    example transforming one model into the model space of
+    another model.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX * </em><a name="p3dc_cross_vrtx"><strong>p3dc_cross_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *A, *B</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This function computes the cross product (vector product) <strong>R
+    = A x B </strong>of two vertices. It assumes they represent
+    two vectors that start at the origin. The code takes steps to
+    allow the result to be the same as either <strong>A</strong>
+    or <strong>B</strong>. If the pointer <strong>R</strong> is
+    null then a new vertex is allocated and returned.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX * </em><a name="p3dc_sub_vrtx"><strong>p3dc_sub_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *A, *B</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This function computes the vector difference <strong>R</strong>
+    = <strong>B - A. </strong>This function is useful for
+    computing a direction vector between two points. Assuming
+    that <strong>A</strong> and <strong>B</strong> represent
+    world co-ordinates, the result <strong>R</strong> is the
+    vector pointing from <strong>A</strong> to <strong>B</strong>.
+    If the pointer <strong>R </strong>is null then a new vertex
+    is allocated and returned.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX *</em> <a name="p3dc_cross3_vrtx"><strong>p3dc_cross3_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *O, *A, *B </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function computes the cross product (vector product)<strong>
+    R = (A - O) x (B - O)</strong>. Which is effectively saying
+    from three points <strong>O</strong>, <strong>A</strong>, and
+    <strong>B</strong> compute the cross product. And when you
+    think about it, if you've got three vertices of a triangle
+    (smallest polygon) this will compute the normal vector
+    (except it still needs to be normalized into a unit vector,
+    see<a href="#p3dc_unit_vrtx"> <em>p3dc_unit_vrtx</em></a>) If
+    the pointer <strong>R</strong> is null a new vertex is
+    allocated and returned.</p>
+</blockquote>
+
+<p><em>p3dc_FLOAT </em><a name="p3dc_dot_vrtx"><strong>p3dc_dot_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *A, *B</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This function computes the dot (or scalar) product <strong>A
+    * B</strong>. It is returned as a float. Note that the scalar
+    product of a vector with itself it its length.</p>
+</blockquote>
+
+<p><em>p3dc_FLOAT </em><a name="p3dc_dot3_vrtx"><strong>p3dc_dot3_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *O, *A, *B </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function computes the dot (or scalar) product of <strong>(A-O)
+    * (B-O)</strong><em> </em>which is mathematically equivalent
+    to the dot product of two vectors whose origin is <strong>O</strong>
+    and whose end points in world space are <strong>A</strong>
+    and <strong>B</strong>.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX *</em><strong> </strong><a name="p3dc_unit_vrtx"><strong>p3dc_unit_vrtx</strong></a><strong>(</strong><em>
+p3dc_VRTX *R, p3dc_VRTX *A </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function &quot;normalizes&quot; a vertex <strong>A</strong>
+    that is presumed to start at the origin. This is used to
+    compute unit vectors in a given direction. If <strong>R</strong>
+    is null a new vertex is allocated.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX *</em><strong> </strong><a
+name="p3dc_normal_vrtx"><strong>p3dc_normal_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *A, *B, *C </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function computes the unit normal vertex for the
+    plane defined by the points <strong>ABC</strong>. These
+    should be in counter clockwise order for the
+    &quot;front&quot; normal and clockwise order for the
+    &quot;back&quot; normal. If the pointer <strong>R</strong> is
+    null then a new vertex is allocated and returned.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX * </em><a name="p3dc_scale_vrtx"><strong>p3dc_scale_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *p3dc_VRTX *A, p3dc_FLOAT s </em><strong>)</strong>
+</p>
+
+<blockquote>
+    <p>This function multiplies a vector <strong>A</strong> by a
+    scalar <em>s</em> and returns the result in <strong>R</strong>.
+    If <strong>R</strong> is null then a new vertex is allocated.</p>
+</blockquote>
+
+<p><em>p3dc_VRTX *</em><strong> </strong><a name="p3dc_add_vrtx"><strong>p3dc_add_vrtx</strong></a><strong>(
+</strong><em>p3dc_VRTX *R, *A, *B </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function returns the vector sum <strong>A + B</strong>.
+    If the pointer <strong>R</strong> is null then a new vertex
+    is allocated and returned.</p>
+</blockquote>
+
+<p> </p>
+
+<p><strong></strong>&nbsp;</p>
+</body>
+</html>

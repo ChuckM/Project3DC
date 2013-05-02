@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft (formerly G3D)</title>
+</head>
+
+<body bgcolor="#FDF4DB">
+
+<h1>The P3DC Drawing Pipeline</h1>
+
+<p>Rendering with P3DC is straightforward but unfortunately it is
+a bit time dependent (it is hard to keep a consistent frame rate
+without threads). The model is as follows:</p>
+
+<ul>
+    <li><em>p3dc_prepare_frame</em>(p3dc<strong>_CLR </strong><em>color</em>)</li>
+    <li><em>... p3dc drawing commands ...</em></li>
+    <li><em>p3dc_flip_frame(int wait)</em></li>
+</ul>
+
+<p>If you were to program a game using this engine, it would have
+some additional layers:</p>
+
+<ul>
+    <li>Read control devices</li>
+    <li>Apply AI terms</li>
+    <li>Apply control changes to user's pieces</li>
+    <li>Check the sound track</li>
+    <li>Render the frame</li>
+</ul>
+
+<p>These things will be present in my first game &quot;Fantasy
+Castle.&quot; </p>
+
+<h2>Drilling Down the Pixel Pipeline</h2>
+
+<p>At the top level the drawing functions are pretty straight
+forward, however it is more interesting when we look at the
+individual drawing functions. Each function has the same basic
+internal structure, it operates as follows.</p>
+
+<blockquote>
+    <p><em>p3dc_draw_</em><em><strong>xxxx</strong></em><em>(</em><em><strong>p3dc_VIEW</strong></em><em>
+    *vp, </em><em><strong>p3dc_XFRM </strong></em><em>*view,</em>
+    <em><strong>int</strong></em><em> flags, </em><em><strong>p3dc_XXXX</strong></em><em>
+    *thing_to_draw)</em></p>
+</blockquote>
+
+<p>From this function call, the parameters are used as follows:</p>
+
+<ul>
+    <li><em>vp</em> -- this is the view port for the hardware
+        functions to use when converting from clip to screen
+        co-ordinates.</li>
+    <li><em>view</em> -- this is the transform to use when
+        rendering the object, models have their own view
+        transform since they combine both their orientation
+        matrix and their camera matrix.</li>
+    <li><em>flags</em> -- these are flags that currently enable
+        parts of the pipeline but in the future will <em>disable</em>
+        parts of the pipeline. (default is the full pipeline
+        enabled)</li>
+    <li><em>thing_to_draw</em> -- this is a pointer to the
+        drawable object, currently there are points, lines,
+        polygons, faces, models, and lists.</li>
+</ul>
+
+<p>The simplest case is drawing points although all of the others
+are basically the same. The code for points is simply:</p>
+
+<blockquote>
+    <pre>void
+p3dc_draw_point(p3dc_VIEW *vp, p3dc_XFRM *view, int flags, p3dc_POINT *p) {
+	__p3dc_total_parts++;
+
+	<font color="#008000">/* Step 1: Light the point */</font>
+	if (flags &amp; P3DC_DRAW_SHADED) {
+		p3dc_light_point(e, p);
+	} 
+
+<font color="#008000">	/* Step 2: Transform the point into view space */
+</font>	p3dc_xfrm_vrtx(NULL, view, p-&gt;p0);
+
+<font color="#008000">	/* Step 3: Clip the result. */</font>
+	if ((flags &amp; P3DC_DRAW_CLIPPED) &amp;&amp; (p3dc_clip_point(p-&gt;p0)))
+		return;
+	__p3dc_drawn_parts++;
+
+<font color="#008000">	/* Step 4: Draw the point. */</font>
+	__hw_draw_point(e, p);
+}</pre>
+</blockquote>
+
+<p>In this code the variable <em>p3dc_total_parts</em> is used to
+give a number of &quot;things&quot; rendered in a given
+prepare/flip block. As you can see the flag <strong>P3DC_DRAW_SHADED</strong>
+is used to determine if the point should be lit according to a
+simple ambient light model. If set the point is lit using the
+function <em>p3dc_light_point</em>. The code in <em>p3dc_light_point</em>
+takes into account the origin point of the camera, the position
+of the lights (attached to the camera structure) and the position
+of the point to come up with an intensity modifier for the
+point's color.</p>
+
+<h3>A Note on Accellerators</h3>
+
+<p>No, not the 3D kind like 3Dfx Voodoo, the ones that let you
+render 3D scenes quickly and get on with things.</p>
+
+<p>P3DC contains a number of techniques that are used to speed up
+the rendering pipeline, the most common technique is pre-caching
+results. There are three results that benefit greatly by being
+saved:</p>
+
+<ol>
+    <li>Vertex Transformation -- These are saved by storing the
+        transformed vertex data in the vertex structure with the
+        identifier of the transform that created that data. Then
+        when you call <em>p3dc_xfrm_vertex</em> if the id in the
+        vertex matches the id in the transform then you're done
+        and the math can be skipped.<br>
+        <br>
+        For this to work however two things have to be true,
+        first, whenever a transform changes its ID <em>must</em>
+        change, and second, the ID used <em>must</em> be unique
+        within the time domain of its usage. By manipulating the
+        transforms only with the transform manipulation library,
+        the identifiers are always changed, by serializing the
+        generation of identifiers to a single routine that simply
+        increments the id each time it gives one out, uniqueness
+        is maintained. By making the ID 16 bits you get 64K
+        transforms before they roll over and so far that hasn't
+        been a problem.</li>
+    <li>Outcode management -- When a vertex is transformed, and
+        the value in <em>w</em> is not 1.0, the vertex is
+        probably going to participate in a clipping round at some
+        point. To speed that up the &quot;outcode&quot; which is
+        an encoding describing whether or not the vertex
+        represents a point that is visible on the screen, is
+        computed and stored with the vertex. This outcode won't
+        change unless the vertex is re-transformed! The clipping
+        code uses it to make fast decisions about those things it
+        needn't bother clipping.</li>
+    <li>Clipped vertices -- In lines the values of the vertices
+        post clipping are stored so that when the line is
+        re-clipped if the view or its vertices haven't changed it
+        can be re-drawn without re-clipping it.</li>
+</ol>
+
+<h2>The P3DC Functions</h2>
+
+<p>This section provides a catalog of the various functions in
+Project: 3D Craft.</p>
+
+<p><em><strong>p3dc_prepare_frame</strong></em><em>(p3dc_CLR
+*color)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+</blockquote>
+
+<blockquote>
+    <p>This function prepares the frame for drawing. Generally it
+    clears the entire screen to the color specified. Normally,
+    you would want to specify whatever the default fog color is
+    here. This is so that when fogging you can ignore things that
+    are &quot;holes&quot; (nothing is rendered in front of them).</p>
+</blockquote>
+
+<p><em><strong>p3dc_flip_frame</strong></em><em>(p3dc_BOOL wait)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+    <p>This function causes the last frame drawn to be
+    &quot;flipped&quot; to the front. The current frame is then
+    pushed into the stack of buffers available to draw on.
+    Usually there will be two buffers the &quot;shown&quot;
+    buffer and the &quot;hidden&quot; buffer. By double buffering
+    like this we don't get nasty drawing artifacts if the screen
+    changes while the monitor has displayed it.</p>
+</blockquote>
+
+<p><em><strong>p3dc_clear_region</strong></em><em>(p3dc_CLR
+*color, p3dc_FLOAT x, y, width, height)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+    <p>This function clears a region of the screen to the
+    indicated color. This is useful when you're not using the
+    whole screen for rendering (say a cockpit window or rear view
+    mirror).</p>
+</blockquote>
+
+<p><em><strong>p3dc_adjust_color</strong></em><em>(p3dc_CLR</em>
+*<em>color, p3dc_FLOAT factor, p3dc_CLR *result)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+    <p>This function multiplies the RGB components of a color
+    struct by a factor that is presumably less than 1.0. This is
+    used in the lighting code to adjust the color of a vertex
+    when a polygon is off angle from the light.</p>
+</blockquote>
+
+<p><em><strong>p3dc_draw_point</strong></em><em>(p3dc_VIEW *vp,
+p3dc_XFRM *view, int flags, p3dc_POINT *point)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+    <p>This function renders a point on the screen. The point is
+    clipped if it falls outside the visible screen boundary.</p>
+</blockquote>
+
+<p><em><strong>p3dc_xfrm_vrtx</strong></em><em>(p3dc_VRTX
+*result, p3dc_XFRM *transform, p3dc_VRTX *src)</em></p>
+
+<blockquote>
+    <p>Returns: <em>void</em></p>
+    <p>This function applies the 3D transformation in <em>transform</em>
+    to the vertex in <em>src</em>. Note that technically the
+    vertex is a 4x1 column vector and the transform is a 4 x 4
+    matrix, however we take advantage of the fact that most of
+    the time we're actually doing the transform in 3 space and
+    don't bother multiplying the last row (0, 0, 0, 1) by the
+    vector to get the value 1.0 in the <em>w</em> output. </p>
+    <p>Now there are a couple of things to note about this
+    routine. First, the transform carries around with it an
+    identifier called <em>id</em>. This identifier is changed any
+    time the transform is changed. The vertex carries around both
+    its original co-ordiantes and its transformed co-ordinates.
+    The transformed co-ordinates include a value <em>xid</em>
+    which is the identifier of the transform last used on the
+    vertex's co-ordinates. Thus if we're trying to transform this
+    vertex a second time with the same transform, nothing really
+    happens and the function returns.</p>
+    <p>If the value <em>result</em> is non-NULL, then the
+    transformed vertex co-ordinates are stored in the results
+    &quot;world&quot; co-ordinates. This is how you move a vertex
+    from one co-ordinate space into another co-ordinate space and
+    it is what happens to models when they are transformed into
+    world co-ordinates.</p>
+</blockquote>
+
+<p><em><strong>p3dc_clip_line</strong></em><em>(p3dc_LINE *line,
+float *delta1, float *delta2) </em></p>
+
+<blockquote>
+    <p>Returns: <em>int</em> -- The integer returned is a clip
+    code, the defined codes are:</p>
+    <ul>
+        <li>CLIP_NONE - the line clipped off the screen so
+            discard it.</li>
+        <li>CLIP_A_B - the line is completely on screen so just
+            draw it.</li>
+        <li>CLIP_A_X - the first vertex on the line (a) was on
+            screen but the second vertex (b) needed to be
+            adjusted.</li>
+        <li>CLIP_X_B - the second vertex on the line (b) was on
+            screen but the first vertex (a) needed to be
+            adjusted.</li>
+        <li>CLIP_X_X - both vertices on the line needed to be
+            adjusted.</li>
+        <li>CLIP_ERROR - one or both of the vertices had not be
+            transformed.</li>
+    </ul>
+    <p>This function clips a line based on its <em>transformed</em>
+    vertices. It uses the value <em>w</em> in the transformed
+    version of the co-ordinates to clip the endpoints to values <em>-w</em>
+    &lt;= <em>x</em> &lt;= <em>w</em>, <em>-w</em> &lt;= <em>y</em>
+    &lt;=<em> w</em>, 0 &lt;= <em>z</em> &lt;=<em> w</em>. The
+    results are stored in two <em>p3dc_PNT4</em> structures <em>c1</em>
+    and <em>c2</em> (clipped vertex 1 and clipped vertex 2). When
+    the <em>p3dc_draw_line</em> function is called it checks the
+    clip code and if it needs to use an adjusted version of the
+    line structure it creates a temporary line structure and uses
+    that.</p>
+</blockquote>
+
+<p><em><strong>p3dc_clip_point</strong></em><em>(p3dc_POINT
+*point)</em></p>
+
+<blockquote>
+    <p>Returns: <em>int</em> - The integer clip code for the
+    point, only one of:</p>
+    <ul>
+        <li>CLIP_NONE - point is outside the visible screen, so
+            drop it.</li>
+        <li>CLIP_A_B - point is visible so plot it.</li>
+    </ul>
+    <p>This function clips a point structure and returns a code
+    to indicate if the point should actually be drawn. There is
+    one accellerator here in that the vertex outcode is cached
+    for a particular transform so that the clipping routine can
+    do its thing.</p>
+</blockquote>
+
+<h4>RCS Logging information for document control.</h4>
+
+<pre>$Id: p3dc.htm,v 1.1 1999-08-17 18:32:50-07 cmcmanis Exp $
+$Log: p3dc.htm,v $
+Revision 1.1  1999/08/18 01:32:50  cmcmanis
+Initial revision
+
+Revision 1.1  1999/07/26 03:11:46  cmcmanis
+Initial revision
+</pre>
+</body>
+</html>

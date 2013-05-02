@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>P3DC Version 5 FAQ</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<h1>Welcome to the P3DC FAQ Page</h1>
+
+<p>This is the Project: 3D Craft (P3DC) Frequently Asked
+Questions file. This release is : ALPHA-0.9 this file was last
+updated 21-Aug-1999 by Chuck McManis.</p>
+
+<h2>The current list of questions:</h2>
+
+<ul>
+    <li><a href="#Q1">What is the P3DC Library?</a></li>
+    <li><a href="#Q2">Can I use this code in my Commercial
+        Application?</a></li>
+    <li><a href="#Q3">Would I want to use this code in my
+        Commercial Application?</a></li>
+    <li><a href="#Q4">Why did you write this library?</a></li>
+    <li><a href="#Q5">How fast is this library?</a></li>
+    <li><a href="#Q6">What operating systems does it run on?</a></li>
+    <li><a href="#Q7">Does it have to use Glide?</a></li>
+    <li><a href="#Q8">Why didn't you just use OpenGL?</a></li>
+    <li><a href="#Q9">How long did it take you to write P3DC?</a></li>
+    <li><a href="#Q10">Do you work on 3D graphics professionally?</a></li>
+    <li><a href="#Q11">I've modified P3DC to handle [some
+        feature] can I distribute it?</a></li>
+    <li><a href="#Q12">Would you consider including my feature in
+        the library?</a></li>
+    <li><a href="#Q13">What versions of Voodoo card (Glide) does
+        P3DC support?</a></li>
+    <li><a href="#Q14">What other hardware are you planning on
+        using?</a></li>
+</ul>
+
+<p>There are a bunch of on-line 3D Graphics resources, I have
+listed some <a href="#RESOURCES">here</a>. And I am also
+maintaining a <a href="#BOOKS">reccomended book list </a>for
+people who want to start building a library of books on 3D
+graphics.</p>
+
+<h2>The current answers:</h2>
+
+<p><a name="Q1">Q) </a><strong>What is the P3DC Library?</strong></p>
+
+<p>A) This library is my attempt at a 3D engine that is
+sufficiently flexible for me to &quot;play around&quot; with 3D
+games programming and 3D experimentation. I've read for years the
+Graphics GEMs books (highly reccomemended) and been unable to
+&quot;try out&quot; the most of the suggested gems because I had
+no environment I knew well enough to hack around it. I was also
+somewhat intimidated by the learning curve of Direct3D (and
+somewhat less so for OpenGL). </p>
+
+<p>Q) <a name="Q2"><strong>Can I use this code in my Commercial
+Application?</strong></a></p>
+
+<p>A) Yes. The code is covered under a BSD style license. (it
+qualifies as &quot;Open Source&quot;) See the file license.txt in
+the distribution.</p>
+
+<p>Q) <a name="Q3"><strong>Would I want to use this code in my
+Commercial Application?</strong></a></p>
+
+<p>A) Probably not, these days OpenGL is a much better choice as
+it runs on a wide variety of platforms and is well supported. My
+stuff is fine for learning one way that you might approach the
+problem of building a 3D engine but even I am never satisfied
+with it (that's why I'm on version 5 and climbing!)</p>
+
+<p>Q)<a name="Q4"> <strong>Why did you write this library?</strong></a></p>
+
+<p>A) So that I could speak intelligently about the issues of
+writing 3D games.</p>
+
+<p>Long boring version :</p>
+
+<blockquote>
+    <p>I started writing graphics programs in 1982 using a PDP-10
+    and a Tek 4010 storage scope, and a PDP-11/55 with a COMTAL
+    video frame buffer attached. Fun but the hardware required a
+    air-conditioned machine room. </p>
+</blockquote>
+
+<blockquote>
+    <p>Then in 1984 I bought an Amiga 1000 and had fun writing
+    programs for it (a lot cheaper but limited colors). Between
+    1987 and 1995 I didn't write any graphics code. In 1995 I
+    bought an Edge3D board for my PC (used Nvidia NV1 chip) but
+    could never figure out how to program it! (Nvidia was a pain
+    to work with at the time and Direct3D version 1 was a TOTAL
+    joke)</p>
+</blockquote>
+
+<blockquote>
+    <p>In 1996 I bought a Diamond Multimedia Monster 3d (Voodoo
+    Graphics) based 3D accellerator for my (upgraded) PC. I tried
+    to write a Direct3D (V2) program and between the bugs in D3D
+    the arcane syntax/calls/overhead I gave up in disgust. Then I
+    found the 3Dfx Glide library and when 2.4 was released I
+    decided I'd see if I could write a program to rotate a 3D
+    cube. It took a while but by mid '97 I some code that could
+    rotate a textured cube. Yippee! </p>
+</blockquote>
+
+<blockquote>
+    <p>Of course this code could not do anything else :-(. So I
+    bought the latest copy of Computer Graphics Principles and
+    Practice, dusted off my old Neumann &amp; Sproul Principles
+    of Interactive Computer Graphics, and dug out my old ACM
+    Siggraph papers and went to work. The result was
+    &quot;Chuck's Graphics Library&quot; which could be used to
+    render flat shaded objects in a 3D world with a fixed field
+    of view camera. I rechristened the project the Generic 3D
+    library (G3D) in late '98 and rebuilt it twice more (versions
+    2, and 3) and got to the point where cameras were getting
+    flexible and I wanted to do animation. </p>
+</blockquote>
+
+<blockquote>
+    <p>Then in late '97 and early '98 I rewrote it a fourth time
+    (G3D-4) and got the polygon count up to 50-75K polygons a
+    second on a 200MX Pentium and Monster 3D, added textures and,
+    with the help of my 7 yr old daughter, embarked on making a
+    3D game. I ran into one roadblock after another and decided I
+    had the wrong architecture still, so I ripped it apart and
+    rewrote it again. That brings us up to the present with
+    version (version 5) which I rechristened <em>again</em> to
+    &quot;Project: 3D Craft&quot; because there were already
+    engines named G3D and that confused people.</p>
+</blockquote>
+
+<blockquote>
+    <p>Then I took sort of a forced break while the startup I'm
+    in heated up, and now (Aug 99) its back together again and
+    running with textures and a much more flexible model
+    architecture.</p>
+</blockquote>
+
+<p>Q) <a name="Q5"><strong>How fast is this library?</strong></a></p>
+
+<p>A) That depends on many things, not the least of which are the
+speed of the processor and the type of interface. The target for
+the library is 130K polygons/second on a P5-200 with a Voodoo1
+card. That would give me a budget of approximately 3K polygons
+per frame at 30FPS (We have to allow some time for game AI,
+sound, etc) But even this number is inaccurate because a scene
+could have 10K polygons and still work at 30FPS if only 3K of
+those polygons were &quot;visible&quot; and ended up going down
+the pipeline to the display. </p>
+
+<p>The short answer is that I've got several game ideas cooking
+and it should be sufficient for all of them. None of them comes
+close to the complexity of Unreal :-). </p>
+
+<p>Q) <a name="Q6"><strong>What operating systems does it run on?</strong></a></p>
+
+<p>A) Windows95 and FreeBSD (Linux would be an easy port).
+Currently there isn't any Glide support under FreeBSD so it
+renders to a file. When I can get the Glide libraries to work
+under FreeBSD there will be a FreeBSD version.</p>
+
+<p>Q)<a name="Q7"> <strong>Does it have to use Glide?</strong></a></p>
+
+<p>A) No. All of the actual &quot;rendering&quot; code goes
+through a &quot;Graphics Abstraction Layer&quot; (gal) that has
+to support what Glide supports however P3DC programs never
+&quot;know&quot; they are talking to Glide, they only know they
+are rendering graphics. I've written an alternate GAL layer
+(gal_text) that generates PNG files for example. If you're
+motivated and want to enhance gal_text.c to do texture mapping
+that would be pretty cool.</p>
+
+<p>Q) <a name="Q8"><strong>Why didn't you just use OpenGL?</strong></a></p>
+
+<p>A) Because I learn by building and I had to build a 3D engine
+to understand it. By using Glide I've got a pretty good device
+driver abstraction to work with. If you're just writing a game or
+something and either already know or don't care to know how 3D
+engines work, I reccomend you use OpenGL. </p>
+
+<p>Q) <a name="Q9"><strong>How long did it take you to write
+P3DC?</strong></a></p>
+
+<p>A) I've been working on it in my &quot;spare&quot; time for a
+couple of years now. However the bulk of the time spent on it was
+late 97 to mid-98. Then I spent the middle of 98 thinking about
+how to re-write it and in August 1998 embarked on Version 5. Then
+there was a long pause and I picked it up again in August of
+1999.</p>
+
+<p>Q) <a name="Q10"><strong>Do you work on 3D graphics
+professionally?</strong></a></p>
+
+<p>A) No, I write and modify operating systems (generally UNIX
+based) and design Internet appliances.</p>
+
+<p>Q)<a name="Q11"> <strong>I've modified P3DC to handle [some
+feature] can I distribute it?</strong></a></p>
+
+<p>A) Yes, any code you write you own and you can do whatever you
+want with it. However you are bound by the P3DC license to
+include my copyright statement where you put your own copyright
+statement (manuals, documentation, etc) </p>
+
+<p>Q) <a name="Q12"><strong>Would you consider including my
+feature in the library?</strong></a></p>
+
+<p>A) Certainly, the beauty of open source is that anyone and
+everyone can contribute and make it better. I do retain change
+control on the final &quot;product&quot;, anything can be placed
+in the &quot;contrib&quot; directory. </p>
+
+<p>Q) <a name="Q13"><strong>What versions of Voodoo card (Glide)
+does P3DC support?</strong></a></p>
+
+<p>A) My main development machine now has a Voodoo2 in it,
+although for a long time I was using a Voodoo Graphics (sst1) in
+the form of a Diamond Monster 3D. I'm using version 2.x of Glide
+because it has the most stable support for Voodoo Graphics, I'll
+probably write a <font face="Times New Roman"><tt>gal_glide3.c</tt></font>
+layer and then be able to compare the to but I've been leary of
+doing that given the problems with its support of Voodoo
+Graphics.</p>
+
+<p>Q)<strong> </strong><a name="Q14"><strong>What other hardware
+are you planning on using?</strong></a></p>
+
+<p>A) Recently, NVidia released C code that would talk directly
+to their TNT and TNT2 engines. This seems pretty cool so I may do
+a gal_tnt.c backend for them as well.</p>
+
+<h2><a name="RESOURCES">RESOURCES</a></h2>
+
+<p>The Glide newsgroup on the 3DFX news server:<br>
+news://news.3dfx.com/3dfx.glide<br>
+<br>
+The comp.graphics.algorithms news group.<br>
+<br>
+The comp.graphics.algorithms FAQ.</p>
+
+<h3><a name="BOOKS">BOOKS</a></h3>
+
+<p>Computer Graphics : Principles and Practice (Systems
+Programming)<br>
+by James D. Foley (Editor), Andries Van Dam (Contributor), <br>
+John Hughes (Contributor), van Dam, Feiner, Hughs <br>
+Addison-Wesley Pub Co; ISBN: 0201848406 </p>
+
+<p>3D Computer Graphics<br>
+by Alan Watt <br>
+Hardcover - 500 pages 2nd edition (September 1993) <br>
+Addison-Wesley Pub Co; ISBN: 0201631865</p>
+
+<p>Graphics Gems<br>
+by Andrew S. Glassner (Editor) <br>
+Hardcover Reissue edition (June 1993) <br>
+Academic Press; ISBN: 0122861663 </p>
+
+<p>Graphics Gems II (The Graphics Gems)<br>
+by James Arvo (Editor) <br>
+Hardcover Reissue edition (October 1994) <br>
+Academic Press; ISBN: 0120644819</p>
+
+<p>Graphics Gems Iii/Book and IBM Disk<br>
+by David Kirk (Editor) <br>
+Hardcover Bk&amp;IBM dsk edition (January 1994) <br>
+Academic Press; ISBN: 0124096735</p>
+
+<p>Graphics Gems Iv/Book and IBM Disk (The Graphics Gems Series)<br>
+by Paul S. Heckbert (Editor) <br>
+Hardcover Book&amp;Disk edition (May 1994) <br>
+Ap Professional; ISBN: 0123361559</p>
+
+<p>Graphics Gems V/Book and IBM Version Disk (The Graphics Gems)<br>
+by Alan W. Paeth (Editor) <br>
+Hardcover - 438 pages Book&amp;Disk edition (May 1995) <br>
+Academic Press; ISBN: 0125434553</p>
+</body>
+</html>

@@ -1,0 +1,49 @@
+The Project 3D Craft (P3DC) Library and Demos License
+
+All of the documentation and software included in the Generic
+3D library is copyrighted by Chuck McManis.
+
+    Copyright (c) 1997, 1998, 1999 Chuck McManis, all rights
+    reserved. 
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met: 
+
+    1. Redistribution of source code must retain the above
+       copyright notice, this list of conditions, and the
+       following disclaimer.
+    2. Redistribution in binary form must reproduce the above
+       copyright notice, this list of conditions, and the
+       following disclaimer in the documentation and/or other
+       materials provided with the distribution.
+    3. All advertising materials mentioning the features or use
+       of this software must display the following
+       acknowledgment:
+
+		This product includes software developed by 
+		members of the Project 3D Craft Team and Chuck 
+		McManis.
+
+       Chuck McManis' name may not be used to endorse or promote
+       products derived from this software without specific
+       prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY CHUCK MCMANIS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL CHUCK MCMANIS BE LIABLE FOR AND
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and the
+documentation are those of the author and should not be interpreted
+as representing official policies, either expressed or implied, of
+any employer of the author.
+
+$Id: license.txt,v 1.1 1999/07/25 09:18:49 cmcmanis Exp cmcmanis $

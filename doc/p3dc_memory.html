@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Memory Management</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Memory management</h1>
+
+<p>Perhaps no aspect of C programming strikes more fear into the
+programmer's heart than the dreaded &quot;Hey, it looks like
+you've got a memory leak.&quot; So evil is this affliction it
+created a multi-million dollar company in the form of Purify Inc.
+Amazing isn't it?</p>
+
+<p>I hate memory management so in this version of the library I
+designed a set of tools that would manage memory for me in a way
+that I hope will be robust and reliable. Also because we're doing
+real-time 3-D graphics here it has to be <em>fast</em>.</p>
+
+<p>This document is broken up into two sections:</p>
+
+<ul>
+    <li><a href="#DESIGN">Architecture and Design</a></li>
+    <li><a href="#API">Programming Interface</a><ul>
+            <li><a href="#p3dc_new_type"><em>p3dc_new_type</em></a></li>
+            <li><a href="#p3dc_free_type"><em>p3dc_free_type</em></a></li>
+            <li><a href="#p3dc_get_type"><em>p3dc_get_type</em></a></li>
+            <li><a href="#p3dc_memstats"><em>p3dc_memstats</em></a></li>
+            <li><a href="#p3dc_reset_memstats"><em>p3dc_reset_memstats</em></a></li>
+        </ul>
+    </li>
+</ul>
+
+<hr>
+
+<h2><a name="DESIGN">Architectural</a> Design</h2>
+
+<p>The memory subsystem was designed around the principle that
+most of the time, the same things get allocated and deallocated
+again and again. In particular the vertices, transforms, colors,
+and lights are used and re-used while generating the scene.</p>
+
+<p>One common technique of addressing this issue is to use
+pre-allocated arrays of things that you use on a dynamic basis.
+The problem with this technique is answering &quot;how many&quot;
+things do you pre-allocate? However, for something like a game,
+this technique can be useful as the answer to the question can be
+determined empirically. This is done by playing the game and
+fixing it when it runs out of space.</p>
+
+<p>The pre-allocation technique is not acceptable in a more
+general purpose engine because you don't know apriori how many
+things will be rendered or changed etc. And yet the simple
+technique of calling malloc/free each time is tremendously
+expensive in terms of CPU time. (even the simpler malloc
+libraries use non-trivial amounts of time.)</p>
+
+<p>The solution I am currently employing and evaluating consists
+of using malloc to force allocations but to never call free.
+(Sounds like a memory leak but it isn't really :-)</p>
+
+<p>I use the fact that as far as the engine is concerned, 99.99%
+of the time the engine or the user will be allocating things of a
+type already known to the engine so the allocator is designed
+around the P3DC type structure. </p>
+
+<p>The design is to allocate structures from the heap, and then
+when deallocating them to put them onto a list so that they might
+be used again later. When a subsequent allocation request is made
+the structure is fetched from the free list. Currently, mallocs
+are done on a 1:1 basis (one request, one malloc) but it is
+possible to change this to malloc several instances in
+preparation for future requests. The cost of this
+'pre-allocation' is that when you reach a steady state you risk
+having over allocated memory by the number of structures in your
+pre-fetch size.</p>
+
+<p>The key interfaces in this library are clearly <em>new</em>
+and <em>free</em> however they manage chunks of memory by
+allocating them as shown below.</p>
+
+<p><img src="images/node-mem.gif" width="436" height="79"></p>
+
+<p>The actual allocation is large enough to hold both a <em>p3dc_NODE</em>
+structure and a structure of the desired type. Then the pointer
+to the type is returned. Later, I can recover the node pointer
+with simple pointer arithmetic and verify it to be valid by the
+following test:</p>
+
+<ul>
+    <li>Does the <em>data.p</em> pointer in the node have the
+        same value as the pointer I was passed?</li>
+</ul>
+
+<p>If they match I assume its valid. Note that this arrangement
+also lets me recover the type of a <em>void *</em> pointer in
+other places in the library too. There is a function <em>p3dc_get_type</em>
+that does this.</p>
+
+<hr>
+
+<h2><a name="API">Programming</a> Interface</h2>
+
+<p><em>void *</em> <a name="p3dc_new_type"><strong>p3dc_new_type</strong></a><strong>(
+</strong><em>p3dc_TYPE req</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function allocates a new structure of type <em>req</em>
+    for the program to use. It first checks the free list to see
+    if any unused structures are present, and if so uses one,
+    otherwise it allocates a new structure + node from the heap
+    and returns a pointer to sufficient memory to hold a
+    structure of type <em>req</em>.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_free_type"><strong>p3dc_free_type</strong></a><strong>(</strong><em><strong>
+</strong></em><em>void *data </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function will free a structure previously allocated
+    with <em>p3dc_new_type</em>. It does this by subtracting a
+    value equal to about <font face="Times New Roman"><tt>sizeof(p3dc_NODE)
+    </tt></font>from the pointer and looking for a <em>p3dc_NODE</em>
+    structure there. Various sanity checks are performed then the
+    structure is added into that node's free list for later
+    reuse. For performance reasons it is added to the head of the
+    free list and will be re-allocated on the next call to <em>p3dc_new_type</em>
+    that needs this type of structure. The side effect of this is
+    that dangling pointer problems are caught quickly.</p>
+</blockquote>
+
+<p><em>p3dc_TYPE </em><a name="p3dc_get_type"><strong>p3dc_get_type</strong></a><strong>(
+</strong><em>void *data</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>Return the P3DC type associated with this pointer. This
+    function only works on things that have been allocated with <em>p3dc_new_type</em>
+    above. If the pointer does not seem to have a node behind it
+    then the function returns <font size="2"><strong>P3DC_UNKNOWN</strong></font>.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_memstats"><strong>p3dc_memstats</strong></a><strong>(
+</strong><em>int reset </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function causes a summary of memory usage to be
+    printed to the <a href="p3dc_log.html">log file</a>. If the
+    value of <em>reset</em> is non-zero, the memory statistics
+    are being reset. This feature allows you to wait for your
+    application to reach steady state and then to dump out
+    statistics to see that no new mallocs are being done.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_reset_memstats"><strong>p3dc_reset_memstats</strong></a><strong>(</strong><em>
+void </em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function will force a reset of the memory statistics.
+    </p>
+</blockquote>
+
+<p>&nbsp;</p>
+</body>
+</html>

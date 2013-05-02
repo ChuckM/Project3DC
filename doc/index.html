@@ -1,0 +1,266 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft Homepage (3D engine for Glide w/ Source)</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft Home Page</h1>
+
+<p><font size="2"><em>Contents of these pages are copyright 1999
+by Charles McManis, All rights reserved.</em></font></p>
+
+<p><a href="images/marble-cube.jpg"><img
+src="images/marble-cube-thumb.gif" align="left" border="0"
+hspace="4" width="128" height="96"></a>Welcome web traveler to
+the home page for <em>Project: 3D Craft</em><font size="2"><sup><strong>TM</strong></sup></font>
+I hope you enjoy your visit. These pages are a combination of
+things, they are a reference for the current implementation of
+Project: 3D Craft, they are also a tutorial of sorts on 3D
+programming (I say of sorts because they are more like a journal
+than a tutorial), and they are sort of a living history as the
+project evolves.</p>
+
+<h2>Recent News:</h2>
+
+<p>This version of these pages is dated Novt-11-99, if you would
+like to be informed when changes are made please send mail to
+(careful here &quot;p3dc-request @ home.mcmanis.com&quot; with
+the body of your message simply the word 'subscribe.' I'll send
+update announcements there.</p>
+
+<p>There is a new demo/download that contains the program <a
+href="downloads/scenetest.zip">SceneTest</a>. This program is the
+multiple camera view demo (see the gallery for a screen shot).
+Anyway, at 200KB it is smaller than downloading the whole
+distribution and rebuilding from scratch.</p>
+
+<p>Two notes:</p>
+
+<ol>
+    <li>It is only tested on Win95+Voodoo+3DFx drivers,
+        Win98+Voodoo2+3Dfx drivers. If you run it on another
+        config and it works let me know. See the file README.txt
+        in the zip file for control notes. [The ESC key exits]</li>
+    <li>It is pretty snappy on a monster machine, it is not
+        nearly so snappy on a smaller machine. My two test
+        machines are a 550Mhz PIII/VooDoo<sup>2</sup> and a
+        400Mhz K6-2/VooDoo Graphics. (aka Voodoo 1)</li>
+</ol>
+
+<h2>Current Release Notes</h2>
+
+<p>The complete release notes are available <a
+href="release_notes.txt">here</a>.</p>
+
+<p><em><strong>New/Fixed this release --</strong></em></p>
+
+<ul>
+    <li>I completely rewhacked how Cameras worked. They are
+        documented <a href="p3dc_CMRA.html">here</a>. (also
+        linked below in the table of contents.)</li>
+    <li>Lighting is broken for points and lines. I figured out
+        how to do it and its between models at the moment.</li>
+    <li>More documentation is available. Now that cameras are
+        done I'm probably going to work on the model
+        documentation.</li>
+    <li>Transparency works again (it used to work in G3D)
+        although it isn't refined yet.</li>
+    <li>A couple of new tests, cameratest and perspective that I
+        wrote while figuring out cameras.</li>
+</ul>
+
+<p>As usual if you find problems or want to comment, feel free to
+send me mail (cmcmanis on this server [mcmanis.com]) My daughters
+are bugging me to write a game for them so I'm looking at doing
+&quot;mazewar&quot; as a way of exercising the library. The
+elements are there, all I need is to get them together into a
+coherent package.</p>
+
+<h2>Things to do and see. (aka the Table of Contents)</h2>
+
+<ul>
+    <li>For those of you are interested in using any of this code
+        in a commercial project (heaven forbid) then you should
+        read the <a href="license.html">license</a> first. It
+        isn't very onerous (its &quot;Berkeley flavored Open
+        Source&quot;) so don't worry. </li>
+    <li>If you are interested in the kinds of scenes that I've
+        rendered with this library (and others if they send them
+        to me) you should probably check out the <a
+        href="gallery.htm"><em>Gallery</em></a>. </li>
+    <li>The source is available as either a zip file or as a
+        gzipped tarball. Its about 2.5MB. There are two build
+        trees, one for FreeBSD and one for Win9x (I use Visual
+        C++ 5.x).<ul>
+            <li><a href="downloads/p3dc.zip">p3dc.zip</a> -- A
+                4MB zip file suitable for Win9x clients.</li>
+            <li><a href="downloads/p3dc.tar.gz">p3dc.tar.gz</a>
+                -- A 4MB gzipped tar file, suitable for BSD and
+                Linux clients.</li>
+        </ul>
+    </li>
+    <li>There is the <a href="#WHATITIS">introduction</a> to this
+        project below, and a fairly brief <a href="#HOWISTARTED">summary</a>
+        of how I got to the point where I wanted to write a 3D
+        engine in the first place.</li>
+    <li>This engine uses 3D objects called &quot;models&quot; to
+        populate the scenes. These are dynamically read from a
+        Model Description Language (MDL) that is described <a
+        href="model-lang.html">here</a>.</li>
+    <li>I'm collecting questions and answers in the P3DC
+        Frequently Asked Question (<a href="p3dc_faq.html">FAQ</a>)
+        list.</li>
+    <li>A snapshot of the library header file (p3dc.h) is <a
+        href="p3dc.txt">here</a>. This is useful reference
+        material in the discussion of the <a
+        href="data_structures.html">Project 3D Craft --
+        Datastructures</a> pages.</li>
+    <li>A description of <a href="p3dc_CMRA.html">how cameras
+        work</a> is now included.</li>
+</ul>
+
+<h2>The To-do List (or projects more or less in priority
+order...)</h2>
+
+<ol>
+    <li>Probably top of the list is to get models
+        documented/working the way I would like. This includes
+        some pathing code to allow me to animate things in a
+        useful way.</li>
+    <li>The &quot;mazewar&quot; game, if only to satisfy my 9 yr
+        old daughter who has already designed half a dozen levels
+        for it.</li>
+    <li>Transparent/Translucent colors.</li>
+    <li>Rewhack lighting for points/lines and models. To do this
+        I'll need an inverse transform point function to
+        transform the lights into view and model space for more
+        efficient lighting calculations. </li>
+    <li>Lightmap textures and texturing in general. I've got some
+        ideas on how to generate terrain without annoying
+        repetition in its textures, I'll have to see how that
+        works out.</li>
+    <li>Re-whack this documentation to give it some semblence of
+        coherency. Top level view - midleve discussions - api and
+        implementation notes, plus as many &quot;this is what I
+        have learned so far&quot; kinds of things.</li>
+</ol>
+
+<h2><a name="WHATITIS">What</a> is &quot;Project: 3D Craft&quot;?</h2>
+
+<p>Good question! (Ok so its a pretty obvious question.) For me
+it is a journey, a journey of understanding the nuances and
+subtlties that are 3D &quot;engines.&quot; Of course there is no
+need to understand 3D engines these days, just use OpenGL or
+DirectX, the machines people are buying are now fast enough that
+pretty much anyone who can read documentation can put together
+enough code to write a game or demo. On the other hand, while
+writing games and demos are neat, I'm a systems guy who likes to
+understand the insides of things. And there wasn't a whole lot
+written on how to write a 3D engine for a game or a demo. One of
+the better resources on the web for 3D engines is the <a
+href="http://cg.cs.tu-berlin.de/~ki/engines.html">3D engines list</a>,
+which lists this engine as well. Other resources are various
+groups like the <a href="news:comp.graphics.algorithms">comp.graphics.algorithms</a>
+and the game programming groups. Anyway, these web pages and this
+engine represent the current point on my journey.</p>
+
+<h2><a name="HOWISTARTED"><strong>Where</strong></a><strong> I
+started ...</strong></h2>
+
+<p>Basically I'm an engineer that has worked with and programmed
+computers professionally since 1976. In 1977 I got
+&quot;hooked&quot; on the personal computer and lusted mightly
+for an Altair 8800 but instead bought a Digital Group Z80 system.
+From the beginning I've been interested in graphics, in the
+beginning it was characters on a TV set, then with a COSMAC Elf
+kit that I purchased and built in 1982 I moved up to 128 x 64
+&quot;pixels.&quot; </p>
+
+<p>When I went to college I had access to a PDP-11 with an
+attached frame buffer that would do 512 x 512 x 24bpp and that
+was so awesome (but really slow, it took about a minute to load a
+complete frame). There was also a Tektronix 4014 that was high
+resolution (4096 x 4096) but only green &amp; black, then there
+was an Apple ][ that had SubLogics 3D package on it, on that
+system I could rotate a wireframe cube in 3D! Woo hoo! I had high
+color, high resolution, and high speed, only they weren't in the
+same system.</p>
+
+<p>Graphics took on new meaning when I went to work at Intel and
+worked on a graphics chip named the 82786 in 1984, it even has a
+small on board processor that could draw lines and do
+&quot;BITBLT&quot; (bit-blit aka Bit Block Transfers), further it
+could pump out 1024 x 768 resolution at a time when a monitor
+that could display that resolution cost $6000 from Barco. This
+was speed with lots of colors, but the cost was high, and I don't
+think Intel ever put the 82786 into serious production. </p>
+
+<p>Then in 1984 I discovered Amiga and the infamous
+&quot;boing!&quot; demo (at Siggraph at Moscone center). A
+rotating, patterned sphere in real time with bounces off the
+edges of the screen. (and sound too!) I saved my pennies and
+bought an Amiga 1000. I loved that machine (and later the 2000)
+for what it could do and what it represented in terms of hardware
+accellerated graphics. I also was introduced to what was later to
+become Lightwave by a guy who was rendering movies frame by frame
+on his camcorder. A lot of work but the results were very cool,
+not Siggraph movie quality, but pretty darn neat none-the-less.</p>
+
+<p>I left Intel for Sun in 1986, and after several years Sun
+introduced the SparcStation with the &quot;Lego&quot; board (you
+know it as the GX card). This was a pretty neat setup, and it did
+really fast fills using NURBS (non-uniform rational b-splines)
+There was even a flight simulator demo that really rocked, boy
+what 10+ MIPs and a graphics accellerator could do.</p>
+
+<p>I then had a demo from a friend of mine (who had designed the
+GX and later helped start NVida) of the NVidia NV1 which was sort
+of like a GX board for PC compatibles. With great excitement and
+anticipation I went out and bought it in the form of the Diamond
+Edge 3D. video accellerator card. Big mistake. First the
+developer's support was non-existent, and second Microsoft had
+chosen a completely separate direction for Direct 3D (triangles
+rather than NURBs), the final straw was D3D sucked rocks and not
+just little rocks, big huge El Capitan sized granite rocks.</p>
+
+<p>Now flash a bit farther forward, I'm reading gamespot.com and
+they &quot;round up&quot; 3D accellerators looking at the Virge
+DX, the NVidia NV1, a couple of others and the Voodoo Graphics.
+Well the 3DFx based Monster 3D board blows everything out of the
+water for benchmarks. I went out and bought one for $214.00.
+Plugged it in, loaded it up and WOW I had really cool stuff going
+on. When I ran the 3Dfx version of Tomb Raider I was just blown
+away. I wanted to be able to build an environment like that! Then
+I discovered that 3Dfx has a very accessible developer API called
+Glide and I downloaded it and all the docs. In less than a day I
+was drawing stuff on the screen and by the time the weekend was
+over I was rotating a cube, now I had the means and the goal, all
+I needed was the knowledge ...</p>
+<!--
+<pre>RCS Cruft to keep track of changes made:
+$Id: index.html,v 1.6 1999-10-31 11:23:50-08 cmcmanis Exp cmcmanis $
+$Log: index.html,v $
+Revision 1.6  1999-10-31 11:23:50-08  cmcmanis
+Camera rewrite is nearly complete. This seems like a logical
+milestone
+
+Revision 1.5  1999/09/02 04:37:39  cmcmanis
+The list rewrite, added some new docs
+
+Revision 1.4  1999/08/21 02:11:01  cmcmanis
+Additional links, more stuff
+
+Revision 1.3  1999/08/20 20:41:34  cmcmanis
+Outdated (renamed to 'L:\P3DC-RCS\doc\index.html,v').
+
+Revision 1.2  1999/08/20 20:10:37  cmcmanis
+Added the history section
+</pre>
+--></body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Datastructures</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Datastructures</h1>
+
+<p>One of the things I've discovered in writing and re-writing
+this library is that the way you structure the data has a huge
+effect on how easy or how hard it is to do things. I remember
+from college waaay back when this was told to me but somehow it
+didn't sink in. I would say that the most time spent so far on
+version 5 has been in crafting new data structures to work with.</p>
+
+<h2>Basic Types</h2>
+
+<p>The first seems pretty trivial but isn't, that is the <a
+name="p3dc_FLOAT"><strong>p3dc_FLOAT</strong></a> type. It is
+typedef'd as a float which seems somewhat redundant however the
+idea is that by changing this you can change the library from
+single precision FP to double precision FP. Presumably you could
+even change it to fixed point but you would need compiler support
+in that case because I have not special cased the math functions
+(add, subtract, multiply, etc) In practice it isn't that simple
+to convert the library (I've done it as a test), but it is
+possible.</p>
+
+<p>Next up in the basic types is structure that holds two
+co-ordinates. It is called a <a name="p3dc_PNT"><strong>p3dc_PNT2</strong></a>
+(point 2) and consists of two p3dc_FLOAT members named <em>u</em>
+and <em>v</em>. I chose <em>u </em>and <em>v </em>because this
+structure is most often associated with textures and textures are
+defined in terms of a <em>uv</em> space to keep from confusing
+them with the <em>xy</em> space of the screen. Here a page of <a
+href="p3dc_PNT.html">things you can do</a> with a <strong>p3dc_PNT2</strong><em><strong>
+</strong></em>type variable.</p>
+
+<p>Two more types in the point family are <strong>p3dc_PNT3</strong><em><strong>
+</strong></em>and<strong> p3dc_PNT4</strong>. The former has
+members <em>x</em>, <em>y</em>, and <em>z</em>, and the latter
+adds the member <em>w</em>. The definitions are compatible so
+casting a point-4 to a point-3 and referring to <em>y</em> will
+change the member <em>y</em> in either definition. Point-3's
+represent points in 3-D space, whereas point-4's are used to
+represent points in a 4-D homogenous space. Because of this
+converting to and from is fairly straight forward. Here is a link
+to <a href="p3dc_PNT.html">things you can do</a> with <strong>p3dc_PNT3</strong>
+and <strong>p3dc_PNT4</strong> type variables.</p>
+
+<p>The next structure is a transform and is named <strong>p3dc_XFRM</strong>.
+A transform has a 16 bit id tag associated with it and a four x
+four array of floats. Transforms are stored in column major order
+so that they are compatible with PHIGS transforms (I use the
+PHIGS code to test my results sometimes). The <em>id</em> member
+of this structure holds a monotonically increasing number that
+uniquely identifies a transform. In the code, when a vertex is
+transformed, the identifier of the transform used is stored in
+the vertex and later, when the vertex is transformed again, if
+the identifiers match then the previously computed result is
+used. This speeds things up when you have static vertices that
+are part of a scene and they are transformed every frame. There
+is, of course, a wide variety of <a href="p3dc_XFRM.html">things
+you can do</a> with a <strong>p3dc_XFRM</strong> typed variable.</p>
+
+<p>Perhaps the most versatile data type in the library are nodes,
+<strong>p3dc_NODE</strong>'s to be exact. These are a very useful
+data structure and are used through out the library to hold
+pointers to allocated memory, pieces of models, etc. The members <em>nxt</em>,
+<em>prv</em>, and <em>parent</em> facilitate connecting nodes
+together as either singly, doubly, or heirarchically linked
+lists. When used hierarchically they are connected into a
+red/black tree (a form of binary tree) and they use the <em>name</em>
+member to identify nodes and the <em>color</em> member to help
+keep the tree balanced. The &quot;payload&quot; of the node
+consists of a type variable which is a defined enum of type <strong>p3dc_TYPE</strong>,
+and a void pointer that points to the payload itself (which can
+be another node of course). When I get into the discussion of <a
+href="p3dc_memory.html">memory management</a> the versatility of
+nodes will become clear. In the mean time there are many <a
+href="p3dc_LIST.html">things you can do</a> with nodes.</p>
+
+<p>The place where nodes are stored is called a <strong>p3dc_LIST</strong>.
+The list structure maintains house keeping values associated with
+a list of nodes, these include the <em>first</em> node on the
+list and the <em>last</em> node on the list. Further, if the list
+is being enumerated there is a <em>current</em> pointer that will
+keep track of the last node seen. Additionally, lists can be <em>type
+exclusive</em> which means they will reject having nodes added to
+them that don' t match a particular type. This is very useful for
+debugging purposes. You can read more about lists on the <a
+href="p3dc_LIST.html">LIST page</a>.</p>
+
+<p>The last of the basic types is the <strong>p3dc_CLR</strong><em><strong>
+</strong></em>definition. This type defines a color in P3DC and
+it is a union of both separate red, green, blue, and alpha
+values, and one &quot;packed&quot; 32 bit RGBA value. There are
+typedefs for big endian and little endian machines so the library
+should port easily to those architectures. I chose the packed
+format as it is simpler to move into and out of it, alternatives
+were a floating point format where each color component has a
+value between 0 and 1.0 but that can be too slow. The color APIs,
+such as they are, are described in their own <a
+href="p3dc_CLR.html">document</a>.</p>
+
+<h2>Compound Types</h2>
+
+<p>With these basic types, some compound types are created. Each
+of the compound types gets its own page for clarity.</p>
+
+<p>The first compound type is the <a href="p3dc_VRTX.html"><strong>p3dc_VRTX</strong></a>
+type. This type defines what a vertex is in the library. Vertices
+are used as the lynch pins that hold together polygons, lines,
+and faces.</p>
+
+<p>&nbsp;</p>
+</body>
+</html>

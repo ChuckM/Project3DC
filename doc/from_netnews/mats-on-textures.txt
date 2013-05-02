@@ -1,0 +1,88 @@
+Subject: Re: Quadratic Approximation Algorithm for perspective texture mapping
+Date: Wed, 01 Dec 1999 20:46:16 +0100
+From: Mats Grahm <matsg@massive.se>
+Organization: 3Dfx Interactive
+Newsgroups: 3dfx.glide
+
+"Chuck McManis cmcmanis@mcmanis.com" wrote:
+
+> Steve, the reason the Glide interface takes "s/w" and "t/w" is to be
+> able to interpolate them linearly. (Glide's s,t are your u,v
+> co-ordinates)
+>
+> Compute 1/w, then multiply that by your u and v co-ordinates giving you
+> "u over w" (uow) and "v over w" (vow), then using linear interpolation
+> walk from (u1,v1) to (u2, v2).
+>
+> --Chuck
+
+Chuck,
+
+Steves problem is that he is trying to do perspective correct texture
+mapping in
+software. Using the technique of interpolating u/w and v/w will certainly
+work,
+but it is slow since he then has to invert the u, v coordinates back at
+every
+pixel in order to calculate the texture coordinates for that pixel. That is,
+calculating 1 / w for every pixel drawn. In Glide, this is performed by the
+hardware, so it is not a problem.
+
+In the days before hardware acceleration, a number of other methods were
+therefore
+often used. The most common technique (used for instance by Quake) was to
+perform
+the division every 16 pixels or so, and interpolate linearly
+(non-perspective
+correct) between these points. And also to abandon perspective correctness
+alltogether when the surface is tilted less than a certain angle against the
+view
+plane.
+
+A second method used in a few games was to abandon strictly horizontal or
+vertical
+scan conversion. Doom used vertical scanning for walls and horizontal for
+floors
+and ceiling, thus always keeping a constant z for the entire scan line. By
+filling
+the polygon with *diagonal* scan lines, it is possible to extend this
+technique to
+arbitrarily oriented surfaces. You can find a vector that lies both in the
+viewing
+plane and the rendered surface by taking the cross product of their normals.
+Since
+the viewing plane has a constant z in view space, this vector will have it
+as
+well. If you can design (this is the tricky part!) an algorithm that covers
+all
+pixels in a polygon with scanlines with a slope of atan(x/y), you will
+therefore
+be able to texture map it with a constant delta-u, delta-v per scan line.
+Only one
+division per scan line is needed.
+
+The third commonly used method is what Steven describes. That is,
+approximating
+the path through texture space with a quadratic or cubic curve. Then
+interpolating
+the derivative (or second derivative), and calculate the pixel's texture
+coordinates with a few adds to running sums. I remember that quadratic
+approximation was just that: a pretty bad approximation. I can't remember if
+the
+cubic version could represent the path exactly, or if it was just a better
+approximation. And I didn't go down this path myself, so I can't recall the
+formula for calculating these derivatives at the beginning of the scan line.
+Instead, I was working hard on the "constant z" method when the first Voodoo
+boards arrived and made me scrap the entire project :)
+
+It's probably possible to find the method described somewhere on Internet.
+But the
+Glide newsgroup is not the right place. One of the most important things
+with 3D
+hardware is that the graphic programmer now can focus his efforts on a
+slightly
+higher level. That damn division per pixel costs nothing in hw, so we are
+free to
+use the much simpler method of interpolating reciprocals.
+
+/mats

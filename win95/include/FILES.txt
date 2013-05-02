@@ -1,0 +1,12 @@
+These are the include files that are needed when you use PNG and
+Zlib, for information on getting copies of these libraries please 
+see the PNG home page : http://www.cdrom.com/pub/png/pngbook.html
+
+For information on Zlib see the Zlib home page that is
+here: http://www.cdrom.com/pub/infozip/zlib/
+
+To really understand PNG go out and buy the book, 
+"PNG: The Definitive Guide" by Greg Roelofs
+ISBN: 1-56592-542-4
+
+--Chuck McManis

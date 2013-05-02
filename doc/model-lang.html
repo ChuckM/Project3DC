@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>P3DC Model Description Language</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>P3DC Model Description Language 1.2<br>
+<font size="2"><em>Copyright © 1997-1999 Charles McManis, all
+rights reserved.</em></font></h1>
+
+<p>This document describes the 1.2 version P3DC model description
+language used by the 3D rendering engine in my library. The
+notation is EBNF with the following meanings:</p>
+
+<ul>
+    <li>Terminals (things you type) are boldfaced and colored
+        blue.</li>
+    <li>Optional productions are enclosed in square brackets '[',
+        ']'.</li>
+    <li>Productions that can repeat end with asterisk '*'</li>
+    <li>When a choice of productions must be made they are
+        separated by vertical bar '|'</li>
+    <li>Nonterminals are written in all UPPER CASE</li>
+    <li>Constants are floating point numbers acceptable to the
+        function atof(3)</li>
+    <li>Comments begin with the hash (#) character and continue
+        to the end of the line.</li>
+    <li>Whitespace (space, tab, newlines) delimits names and
+        keywords.</li>
+    <li>Keywords and names are case <em>insensitive.</em></li>
+    <li>Most keywords can be abbreviated to their first letter,
+        the exceptions are LINE, LIGHTMAP, DETAIL, and DECAL
+        which need three letters in order to be unique. </li>
+    <li><em>All</em> names exist in the same name space so you
+        cannot name a texture &quot;<em>base&quot;</em> and also
+        name a color &quot;<em>base&quot;</em>.</li>
+    <li>Names must start with a letter and can only contain the
+        characters in the set [a-zA-Z$_] and they are limited to
+        a maximum length of 63 characters .</li>
+</ul>
+
+<p>Models begin with a model keyword and a name, their bodies are
+enclosed in braces. Model descriptions may not be nested but may
+be several to a file. The model namespace is flat in P3DC
+therefore you are not allowed to have two models named cube for
+example. </p>
+
+<p><font size="2"><em>[The </em><em><strong>model</strong></em><em>
+statement is defined as a way of creating heirarchical models but
+is not currently implemented.]</em></font></p>
+
+<h2>The Grammar</h2>
+
+<pre>MODEL		   ::= <font color="#0000FF"><strong>Model</strong></font> NAME MODEL-BODY</pre>
+
+<pre>MODEL_BODY	   ::= <font color="#0000FF"><strong>{</strong></font> STATEMENT* <font
+color="#0000FF"><strong>}</strong></font></pre>
+
+<pre>STATEMENT	   ::= 	[ ORIGIN_STATEMENT ]   |
+		       	[ COLOR_STATEMENT ]*   |
+			[ VERTEX_STATEMENT ]*  |
+			[ TEXTURE_STATEMENT ]* |
+			[ POINT_STATEMENT ]*	  |
+			[ MODEL_STATEMENT ]*   |
+			[ LINE_STATEMENT ]*    |
+			[ FACE_STATEMENT ]*</pre>
+
+<pre>ORIGIN_STATEMENT   ::= <font color="#0000FF"><strong>Origin </strong></font>CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>COLOR_STATEMENT	   ::= <font color="#0000FF"><strong>Color</strong></font> NAME<font
+color="#0000FF"><strong> =</strong></font> COLOR_TUPLE <font
+color="#0000FF"><strong>;</strong></font> </pre>
+
+<pre>VERTEX_STATEMENT   ::= <font color="#0000FF"><strong>Vertex</strong></font> NAME <font
+color="#0000FF"><strong>=</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>TEXTURE_STATEMENT  ::= <font color="#0000FF"><strong>Texture</strong></font> NAME <font
+color="#0000FF"><strong>=</strong></font> <font color="#0000FF"><strong>Decal </strong></font>|<font
+color="#0000FF"><strong> LIGhtmap</strong></font> | <font
+color="#0000FF"><strong>DETail</strong></font> [ <font
+color="#0000FF"><strong>, Wrap</strong></font> ] <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>POINT_STATEMENT	   ::= <font color="#0000FF"><strong>Point</strong></font> [ COLOR_SPEC ] NAME<strong> </strong><font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>LINE_STATEMENT	   ::= <font color="#0000FF"><strong>Line</strong></font> [ COLOR_SPEC ] NAME <font
+color="#0000FF"><strong>,</strong></font> NAME <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>FACE_STATEMENT	   ::= <font color="#0000FF"><strong>Face</strong></font> [ TEXTURE_LIST ] [ COLOR_SPEC ] VERTEX_SPEC <font
+color="#0000FF"><strong>,</strong></font> 
+			      VERTEX_SPEC <font color="#0000FF"><strong>,</strong></font> VERTEX_SPEC [ <font
+color="#0000FF"><strong>,</strong></font> VERTEX_SPEC]* <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>MODEL_STATEMENT    ::= <font color="#0000FF"><strong>Model</strong></font> NAME [ COLOR SPEC ] NAME NORMAL_SPEC CONSTANT <font
+color="#0000FF"><strong>;</strong></font></pre>
+
+<pre>VERTEX_SPEC	   ::= NAME [ NORMAL_SPEC ] [ TEXTURE_COORD ]*</pre>
+
+<pre>COLOR_SPEC         ::= <font color="#0000FF"><strong>(</strong></font> NAME <font
+color="#0000FF"><strong>)</strong></font></pre>
+
+<pre>TEXTURE_LIST       ::= <font color="#0000FF"><strong>&lt;</strong></font> NAME [ <font
+color="#0000FF"><strong>,</strong></font> NAME ]* <font
+color="#0000FF"><strong>&gt;</strong></font></pre>
+
+<pre>NORMAL_SPEC	   ::= <font color="#0000FF"><strong>[</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>]</strong></font></pre>
+
+<pre>TEXTURE_COORD      ::= <font color="#0000FF"><strong>&lt;</strong></font> CONSTANT <font
+color="#0000FF"><strong>,</strong></font> CONSTANT <font
+color="#0000FF"><strong>&gt;</strong></font></pre>
+
+<pre>COLOR_TUPLE	   ::= RED <font color="#0000FF"><strong>,</strong></font> GREEN <font
+color="#0000FF"><strong>,</strong></font> BLUE [ <font
+color="#0000FF"><strong>,</strong></font> ALPHA ] </pre>
+
+<pre>RED		   ::= COLOR_CONSTANT</pre>
+
+<pre>GREEN		   ::= COLOR_CONSTANT</pre>
+
+<pre>BLUE		   ::= COLOR_CONSTANT</pre>
+
+<pre>ALPHA		   ::= COLOR_CONSTANT</pre>
+
+<pre>COLOR_CONSTANT	   ::= 0 &lt;= CONSTANT &lt;= 255.0</pre>
+
+<pre>CONSTANT	   ::= floating point number</pre>
+
+<pre>NAME		   ::= character string &lt; 63 characters long from the
+                       set A-Za-z0-9_$ with the initial character from
+                       the set A-Za-z.</pre>
+
+<h2>An Example Model File</h2>
+
+<p>This example file describes a textured cube. As you can see it
+assumes the texture for the cube is layed out in a cross topology
+(think about what it would look like if you unfolded all of the
+cube sides.) There is also a specification for a lightmap (which
+creates an illumination effect on the top and bottom.) The light
+map could have been part of the same texture file however if you
+wish to use the same file as both a light map and a base texture
+(obviously you have to use different parts of the texture for
+this!) then you can do that by assigning the same texture to the <em>base_texture</em>
+and the <em>lightmap_texture</em> attributes when the model is
+instantiated. (see usage below)</p>
+
+<p>Another important point to remember is that faces are
+specified with their vertices in counter-clockwise order. This
+determines the &quot;front&quot; for the face where the texture
+will appear. You can have different textures and/or colors on
+both the front and back of a face, just specify the face twice,
+once with the textures one way and once with them the other way.</p>
+
+<p><img src="cube-verts.gif" align="right" hspace="5" width="150"
+height="161">The cube was chosen as a good example as it is easy
+to visualize and understand. The file stdmodels.3dc will
+eventually have standard models for all of the basic shapes,
+cube, cone, sphere, pyramid, cylinder.</p>
+
+<p>As you can see in the picture at the right, the cube has eight
+vertices. In the first versions of the library each side (or
+face) of the cube had its own set of vertices, this allowed each
+side to have unique texture co-ordinates but it also meant that
+to transform the cube into my 3D world I needed to transform 24
+vertices! (6 sides x 4 vertices each). Now I transform 8 vertices
+and I'm done. This is an example of where not doing something
+(transforming extra vertices) makes things a whole lot faster.</p>
+
+<p><img src="cube-face.gif" align="left" hspace="5" width="205"
+height="161">This cube still has six faces, I've colored one in
+the picture at left to show you an example of one. This face is
+defined by the four vertices <em>V2</em>, <em>V8</em>, <em>V6</em>,
+and <em>V3</em>. Note that if you were on the right hand side of
+this cube and looking at it straight on, those vertices would be
+in counter clockwise order. It is not important which vertex is
+first and last in the list, so we could equivalently use the
+vertices <em>V3, V2, V8, </em>and <em>V6. </em>And get exactly
+the same face, but if we reverse the order to be clockwise then
+we would be defining the face on the <em>inside</em> of the cube.</p>
+
+<p>&nbsp;</p>
+
+<p>In a previous version of this language I assigned a name to
+each face, after implementing the language I found the name to be
+redundant and so have deleted it from the specification. The
+things that are named however (things like colors and textures)
+are named so that they may be changed when the model is
+instantiated by the library. Ok, so lets look a the model
+definition as it would appear in the file.</p>
+
+<pre><font color="#008000">#
+# Definition for the CUBE model
+#
+</font><font color="#0000FF">model</font><font color="#008000"> </font><font
+color="#400000">cube</font><font color="#008000"> </font><font
+color="#0000FF">{</font></pre>
+
+<p>The non-comment line should be the keyword <strong>model</strong>
+followed by the name of the model. Since all models share a
+single name space if you had several variations of cubes you
+might call this one <em>unit_cube</em> instead of just <em>cube</em>.
+Note though that you can change the cubes overall dimensions when
+the cube is instantiated.</p>
+
+<pre>    <font color="#0000FF">origin</font> <font
+color="#0000FF">=</font> 0, 0, 0 <font color="#0000FF">;</font>
+    <font color="#0000FF">color</font> base_color <font
+color="#0000FF">=</font> 0, 255, 0 <font color="#0000FF">;</font>
+    <font color="#0000FF">color</font> highlight <font
+color="#0000FF">=</font> 255, 0, 0 <font color="#0000FF">;</font>
+    <font color="#0000FF">texture</font> base_texture <font
+color="#0000FF">= decal, wrap ;</font>
+    <font color="#0000FF">texture</font> light_map <font
+color="#0000FF">= lightmap ;</font></pre>
+
+<p>The next few lines define a catalog of attributes for the
+model, the first, <strong>origin</strong>, defines where the
+center of the model is in its local 3D model space. This is the
+point upon which the model with rotate or turn when you use the
+model api in the library to change its attitude. This is also the
+point of the model that can be precisely located when you use the
+<em>p3dc_locate_model</em> function. The origin does not have to
+be a vertex or even within the bounds of the model.</p>
+
+<p>Following the origin there are two colors defines, one named <em>base_color</em>
+and the other named <em>highlight</em>. You can assign different
+color names (and defaults) to the model using these statements,
+later when the model is instantiated the colors can be changed
+with the <em>p3dc_model_set_color</em> function.</p>
+
+<p>Finally there are two lines defining textures, one called <em>base_texture</em>
+and one called <em>light_map</em>. (note that the spelling is
+changed to prevent it from being confused with the keyword
+'lightmap'). When the model has been instantiated you will load
+textures and then apply them using the names from the model file
+and the api call <em>p3dc_model_set_texture</em>. </p>
+
+<pre>    <font color="#0000FF">vertex</font> V1 <font
+color="#0000FF">=</font> -0.5, -0.5, -0.5 <font color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V2 <font color="#0000FF">=</font>  0.5, -0.5, -0.5 <font
+color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V3 <font color="#0000FF">=</font>  0.5,  0.5, -0.5 <font
+color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V4 <font color="#0000FF">=</font> -0.5,  0.5, -0.5 ;
+    <font color="#0000FF">vertex</font> V5 <font color="#0000FF">=</font> -0.5,  0.5,  0.5 <font
+color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V6 <font color="#0000FF">=</font>  0.5,  0.5,  0.5 <font
+color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V7 <font color="#0000FF">=</font>  0.5, -0.5,  0.5 <font
+color="#0000FF">;</font>
+    <font color="#0000FF">vertex</font> V8 <font color="#0000FF">=</font> -0.5, -0.5,  0.5 <font
+color="#0000FF">;</font></pre>
+
+<p>After the attributes the eight vertices are defined, they are
+named <em>V1</em> through <em>V8</em> (not very interesting I
+know). As you can see they define a cube where the corners are
+between -0.5, -0.5, -0.5 and 0.5, 0.5, 0.5. </p>
+
+<p>Take a moment to consider what that means, it means that the
+center of gravity of this cube is 0,0,0 (half way between all the
+points). Alternatively you could put all of your vertices between
+0 and 1 and then set the origin to 0.5, 0.5, 0.5. The latter
+works, however when you scale the model on instantiation, the
+origin <em>doesn't move</em>. so if it isn't at 0,0,0 you will
+get some unexpected (but predictable) results.</p>
+
+<p>Finally we get to define some sides and they appear as
+follows:</p>
+
+<pre><font color="#008000">#
+# side faces
+#</font>
+    <font color="#0000FF">face</font> &lt;base_texture&gt; (base_color) 
+                  V1 &lt;64,192&gt;, V2 &lt;128, 192&gt;, V3 &lt;128, 255&gt;, V4 &lt;64, 255&gt; ;
+    <font color="#0000FF">face</font> &lt;base_texture&gt; (highlight) 
+                  V2 &lt;0, 128&gt; , V7 &lt;64, 128&gt;, V6 &lt;64, 192&gt;, V3 &lt;0, 192&gt; ;
+    <font color="#0000FF">face</font> &lt;base_texture&gt;  
+                  V5 &lt;64, 128&gt;, V6 &lt;128,128&gt;, V7 &lt;128, 192&gt;, V8 &lt;64, 192&gt; ;
+    <font color="#0000FF">face</font> &lt;base_texture&gt; 
+                  V1 &lt;128, 128&gt;, V4 &lt;192, 128&gt;, V5 &lt;192, 192&gt;, V8 &lt;128, 192&gt; ;
+<font color="#008000">#
+# top and bottom faces
+#</font>
+    <font color="#0000FF">face</font> &lt;base_texture, light_map&gt; 
+		  V4 &lt;64, 64&gt; &lt;0, 0&gt;, V3 &lt;128,64&gt;&lt;0,255&gt;, 
+		  V6 &lt;128,128&gt;&lt;255,255&gt;, V5 &lt;64,128&gt;&lt;255,0&gt; ;
+    <font color="#0000FF">face</font> &lt;base_texture, light_map&gt; 
+		  V1 &lt;64,0&gt;&lt;0, 0&gt;, V8 &lt;128,0&gt;&lt;0,255&gt;, 
+		  V7 &lt;128,64&gt;&lt;255,255&gt;, V2 &lt;64,64&gt;&lt;255,0&gt; ;
+<font color="#0000FF">}</font></pre>
+
+<p>As you can see from the lines above the faces are simply
+statements that collect vertices into groups (faces) and place
+textures on them at particular co-ordinates. </p>
+
+<p>The texture co-ordinates in this case are going from 0 to 255
+which is a Glide standard however in the very near future they
+will go between 0 and 1.0 for the full texture. This makes
+understanding their mid-points etc easier. (and it is Glide 3
+compatible so that is a bonus.)</p>
+
+<p>Finally the model description ends with a closing brace '}'
+which tells the parsing function that there is no more model to
+parse.</p>
+
+<h4>Document tracking information</h4>
+
+<pre>Document ID
+$Id: model-lang.html,v 1.3 1999-09-01 21:37:41-07 cmcmanis Exp $</pre>
+</body>
+</html>

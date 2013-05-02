@@ -1,0 +1,347 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Transform Data Structure</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Transform data structure.</h1>
+
+<p>The <strong>p3dc_XFRM</strong> data structure represents a 3-D
+transformation in the P3DC environment. The contents are a 4 x 4
+matrix (<em>data) </em>and an identifier member called <em>id</em>.
+Normally, the identifier represents a unique number so that the
+transform's identity can be ascertained, however there are two
+special IDs. An identifier value of 0 indicates that the
+transform has no data in it at all, thus it requires
+initialization before use. Any use of a transform with a zero
+identifier can be trapped by the code and rejected using asserts.
+The second special identifier is the value one (1). This
+identifier indicates that the matrix has been initialized to be
+the <em>identity</em> matrix. The identity matrix is zero except
+for the matrix diagonal which is initialized to the value one
+(1). </p>
+
+<p>Functions that are described in this document:</p>
+
+<ul>
+    <li><a href="#p3dc_identity_xfrm">p3dc_identity_xfrm</a></li>
+    <li><a href="#p3dc_free_xfrm">p3dc_free_xfrm</a></li>
+    <li><a href="#p3dc_mult_xfrm">p3dc_mult_xfrm</a></li>
+    <li><a href="#p3dc_dump_xfrm">p3dc_dump_xfrm</a></li>
+    <li><a href="#p3dc_locate_xfrm">p3dc_locate_xfrm</a></li>
+    <li><a href="#p3dc_move_xfrm">p3dc_move_xfrm</a></li>
+    <li><a href="#p3dc_scaleXYZ_xfrm">p3dc_scaleXYZ_xfrm</a></li>
+    <li><a href="#p3dc_scale_xfrm">p3dc_scale_xfrm</a></li>
+    <li><a href="#p3dc_xrot_xfrm">p3dc_xrot_xfrm</a></li>
+    <li><a href="#p3dc_yrot_xfrm">p3dc_yrot_xfrm</a></li>
+    <li><a href="#p3dc_zrot_xfrm">p3dc_zrot_xfrm</a></li>
+    <li><a href="#p3dc_orientation_xfrm">p3dc_orientation_xfrm</a></li>
+    <li><a href="#p3dc_camera_xfrm">p3dc_camera_xfrm</a></li>
+</ul>
+
+<hr>
+
+<p>The following functions operate on transforms in the library,
+they are written in C prototype form for clarity.</p>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_identity_xfrm"><strong>p3dc_identity_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM *A</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This function either initializes the transform referenced
+    by the pointer <strong>A</strong> to be the identity
+    transform, or, if <strong>A</strong> is null, it allocates a
+    new transform, initializes that and returns a pointer to it.
+    In all cases the returned pointer points to the initialized
+    transform and the transform's identity is set to 1. (If a
+    pointer was passed it is simply returned.) If this function
+    returns null then it could not allocate a new transform.</p>
+</blockquote>
+
+<p><em>void</em> <a name="p3dc_free_xfrm"><strong>p3dc_free_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM **A </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function discards a transform structure that is no
+    longer needed. The memory used is not actually given back to
+    the operating system, rather the transform is placed on a
+    list of available structures and will be re-allocated when a
+    transform is needed again. See the description in &quot;<a
+    href="p3dc_memory.html">Project: 3D Craft -- Memory Managemen</a>t&quot;
+    for more details on how this is done.</p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_XFRM *</em></font><a
+name="p3dc_mult_xfrm"><font color="#000000"><strong>p3dc_mult_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *R, p3dc_XFRM
+*A, p3dc_XFRM *B</em><strong> )</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">This function multiplies two
+    transforms and returns the result. In matrix notation it
+    returns <strong>AB</strong> which it is important to note is
+    different than <strong>BA</strong>. (Matrix multiplication
+    isn't commutative). If the pointer <strong>R</strong> is
+    null, a new transform is allocated to hold the result,
+    otherwise the result is stored in <strong>R</strong> and any
+    previous contents of <strong>R</strong> are lost. The
+    function is written so that the pointer <strong>R</strong>
+    can be the same as either <strong>A</strong> or <strong>B</strong>
+    and still behave correctly (that is you can implement <strong>A
+    = AB</strong> with one call.) This function will return null
+    if the result pointer was null and the library was unable to
+    allocate a new transform structure. The identifier in the
+    result transform will be unique.</font></p>
+</blockquote>
+
+<p><font color="#000000"><em>void </em></font><a
+name="p3dc_dump_xfrm"><font color="#000000"><strong>p3dc_dump_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *T, char *title,
+char *head</em><strong>, </strong><em>char *fmt, char *tail </em><strong>)</strong></font></p>
+
+<blockquote>
+    <p><font color="#000000">This function is a diagnostic
+    function for dumping a transform's contents into the log
+    file. (see </font><a href="p3dc_log.html"><font
+    color="#000000"><em>p3dc_log</em></font></a><font
+    color="#000000"> for more details on logging.) The pointer <strong>T</strong>
+    points to the transform to dump. Next there are four optional
+    strings, if they are all NULL then the library defaults them
+    to a generic set, otherwise they are used as follows:</font></p>
+    <ul>
+        <li><font color="#000000"><em>title</em> - This string is
+            printed before the transform is printed. the default
+            is to print the string &quot;P3DC matrix (XID = <em>nnn</em>):&quot;
+            where <em>nnn</em> is the identifier in the
+            transform.</font></li>
+        <li><font color="#000000"><em>head</em> - This string is
+            printed before each row of the matrix, if null it
+            defaults to &quot; &quot; but you can set it to
+            &quot;| &quot; to get vertical bars on your matrix.</font></li>
+        <li><font color="#000000"><em>tail</em> - This string is
+            printed after each row of the matrix and should
+            include a new line \n character. </font></li>
+        <li><font color="#000000"><em>fmt</em> - This string is
+            used to format each element of the matrix, it
+            defaults to &quot;%#8.4f &quot;.</font></li>
+    </ul>
+    <p><font color="#000000">An example of printing a matrix with
+    using the defaults is:</font></p>
+    <pre><font color="#000000">P3DC matrix (XID = 1):
+    1.0000    0.0000    0.0000    0.0000  
+    0.0000    1.0000    0.0000    0.0000  
+    0.0000    0.0000    1.0000    0.0000  
+    0.0000    0.0000    0.0000    1.0000  </font></pre>
+    <p><font color="#000000">And with
+    tile=&quot;*TITLE*TITLE*\n&quot;, head = &quot;*HEAD* &quot;,
+    tail = &quot;*TAIL*\n&quot;, and fmt = &quot;%g&quot;, you
+    get this print out in the log:</font></p>
+    <pre><font color="#000000">*TITLE*TITLE*
+*HEAD*  1000  *TAIL*
+*HEAD*  0100  *TAIL*
+*HEAD*  0010  *TAIL*
+*HEAD*  0001  *TAIL*</font></pre>
+</blockquote>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_locate_xfrm"><strong>p3dc_locate_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM *A, p3dc_FLOAT x, y, z </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function has two modes of operation. The simplest
+    occurs when the passed in value for <em>A</em> is null. In
+    that case, the function allocates a new identity transform
+    and sets its last column to be the translation specified. The
+    constructed transform is then returned. It will return null
+    if a transform could not be allocated.</p>
+    <p>When <em>A</em> is not null, this function performs the
+    matrix operation: <strong>A</strong> = <strong>AT</strong><sub><strong>xyz</strong></sub>
+    where the transform <strong>T</strong><sub><strong>xyz</strong></sub>
+    represents a translation transformation and <strong>A</strong>
+    is the original transformation. The original transform <strong>A</strong>
+    is changed by this operation.</p>
+    <p>This function is used when constructing more complicated
+    compound transformations. For example, when computing a
+    transform to rotate a model about its local origin, the
+    required mathematical construction is, <strong>A</strong> - <strong>T</strong><sub><strong>-x-y-z</strong></sub><strong>R</strong><font
+    face="Symbol"><sub><strong>q</strong></sub></font><strong>T</strong><sub><strong>xyz</strong></sub>
+    which consists of a translation from the local origin at (x,
+    y, z) to zero, followed by the application of a rotation
+    transformation, followed by the application of another
+    translation transformation to return the origin to (x, y, z).</p>
+</blockquote>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_move_xfrm"><strong>p3dc_move_xfrm</strong></a><strong>(
+</strong><em>p3dc_XFRM *A, p3dc_PNT3 *V, p3dc_FLOAT dt</em><strong>
+)</strong> </p>
+
+<blockquote>
+    <p>This function is similar to the locate function except
+    that it takes as its parameters a vector <em>V</em> and a
+    distance <em>dt</em>. Again if <em>A</em> is null a new
+    transform is allocated, if <em>A </em>is not null then it is
+    modifed by a translation in the direction of <em>V</em> for a
+    distance of <em>dt</em> units. This is useful when you want
+    to move an object along a path during animation.</p>
+</blockquote>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_scaleXYZ_xfrm"><strong>p3dc_scaleXYZ_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM *A, p3dc_FLOAT x, y, z</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function will apply a scaling factor (possibly
+    non-uniform) to the three axes. The effect is the points
+    transformed by the resulting transform will have their x, y,
+    and z components re-sized by possibly different amounts. As
+    with all of the transformation functions if <em>A</em> is
+    null a new transform is allocated, otherwise the
+    transformation is applied to <em>A </em>and <em>A</em> is
+    returned updated.</p>
+    <p><strong>WARNING:</strong> a transform has been scaled
+    non-uniformly it is no longer affine. Objects transformed by
+    this transform may have angles between their components
+    changed and the relative lengths of the components will
+    definitely be changed. Those types of changes will invalidate
+    any precomputed plane normals.</p>
+</blockquote>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_scale_xfrm"><strong>p3dc_scale_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM *A, p3dc_FLOAT s</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function applys a uniform scaling transformation to
+    the passed transform. As with other functions if the pointer <em>A</em>
+    is null a new transform is allocated, if that allocation
+    fails then null is returned. Unlike <em>p3dc_scaleXYZ_xfrm</em>
+    the resulting transform remains affine and so plane normals
+    and and angles are not changed when transformed by the
+    resulting transform. </p>
+</blockquote>
+
+<p><em>p3dc_XFRM *</em><a name="p3dc_zrot_xfrm"><strong>p3dc_zrot_xfrm</strong></a><strong>(</strong><em>
+p3dc_XFRM *A, p3dc_FLOAT angle</em> <strong>)</strong></p>
+
+<blockquote>
+    <p><font color="#000000">This function computes a rotation
+    transformation of <em>angle</em> degrees about the Z axis and
+    then applys that rotation to the the transform <em>A</em>. If
+    <em>A </em>is null then a new transform is allocated that
+    holds the Z rotation. If the allocation fails, null is
+    returned. Postive angles represent clockwise rotation when
+    looking along the Z axis into positive infinity. (Left hand
+    co-ordinate system)</font></p>
+    <p><font color="#000000">Transform rotations are specified
+    using degrees rather than radians. I chose degrees because,
+    for me, they are a more &quot;natural&quot; unit. The #define
+    macros D2R and R2D are provided in p3dc.h to convert from
+    degrees to radians and from radians to degrees respectively. </font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_XFRM *</em></font><a
+name="p3dc_yrot_xfrm"><font color="#000000"><strong>p3dc_yrot_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *A, p3dc_FLOAT
+degree </em><strong>)</strong></font></p>
+
+<blockquote>
+    <p><font color="#000000">This function computes a rotation
+    transformation of <em>angle</em> degrees about the Y axis and
+    then applys that rotation to the the transform <em>A</em>. If
+    <em>A </em>is null then a new transform is allocated that
+    holds the Y rotation. If the allocation fails, null is
+    returned. Postive angles represent clockwise rotation when
+    looking up the Y axis into positive infinity. (Left hand
+    co-ordinate system)</font></p>
+</blockquote>
+
+<blockquote>
+    <p><font color="#000000">Transform rotations are specified
+    using degrees rather than radians. I chose degrees because,
+    for me, they are a more &quot;natural&quot; unit. The #define
+    macros D2R and R2D are provided in p3dc.h to convert from
+    degrees to radians and from radians to degrees respectively. </font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_XFRM *</em></font><a
+name="p3dc_xrot_xfrm"><font color="#000000"><strong>p3dc_xrot_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *A, p3dc_FLOAT
+degree </em><strong>)</strong></font></p>
+
+<blockquote>
+    <p><font color="#000000">This function computes a rotation
+    transformation of <em>angle</em> degrees about the X axis and
+    then applys that rotation to the the transform <em>A</em>. If
+    <em>A </em>is null then a new transform is allocated that
+    holds the X rotation. If the allocation fails, null is
+    returned. Postive angles represent clockwise rotation when
+    looking along the X axis into positive infinity. (Left hand
+    co-ordinate system)</font></p>
+</blockquote>
+
+<blockquote>
+    <p><font color="#000000">Transform rotations are specified
+    using degrees rather than radians. I chose degrees because,
+    for me, they are a more &quot;natural&quot; unit. The #define
+    macros D2R and R2D are provided in p3dc.h to convert from
+    degrees to radians and from radians to degrees respectively. </font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_XFRM *</em></font><a
+name="p3dc_orientation_xfrm"><font color="#000000"><strong>p3dc_orientation_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *A, p3dc_PNT3
+*dir, *origin, p3dc_FLOAT roll</em><strong> )</strong> </font></p>
+
+<blockquote>
+    <p><font color="#000000">This is a pretty neat function, it
+    creates a transform that will transform from a local
+    co-ordinate system into another co-ordinate system at a given
+    location and orientation. The inputs to this function are <em>A</em>
+    a transform to re-use, if <em>A</em> is null a new transform
+    is allocated. Note that this function differs from the others
+    in that it does not apply the computed transformation to <em>A</em>
+    instead it <em><strong>replaces</strong></em> the
+    transformation in <em>A </em>with the one it computes. The
+    vector <em>dir</em> is a unit vector pointing along the
+    direction where the positive Z axis in local space should be
+    headed in the transformation space. The point <em>origin</em>
+    is represents the location in transformation space to which
+    the local space origin should be translated. The value <em>roll</em>
+    represents a rotation about the local space's Z axis that
+    should be applied in order to position the local notion of
+    up. In summary, this function computes a transformation given
+    a vector and an angle to translate from one co-ordinate space
+    into another.</font></p>
+    <p><font color="#000000">This function is used to position
+    models into world co-ordinates. </font></p>
+</blockquote>
+
+<p><font color="#000000"><em>p3dc_XFRM *</em></font><a
+name="p3dc_camera_xfrm"><font color="#000000"><strong>p3dc_camera_xfrm</strong></font></a><font
+color="#000000"><strong>(</strong><em> p3dc_XFRM *V, p3dc_PNT3
+*dir, *origin, p3dc_FLOAT roll</em><em><strong> ) </strong></em></font></p>
+
+<blockquote>
+    <p><font color="#000000">This function is the inverse of the <em>p3dc_orientation_xfrm</em>
+    function. When applied it transforms the world into the
+    co-ordinate system of a camera sitting at the position in <em>origin</em>
+    in world co-ordinates, looking in the direction of <em>dir</em>
+    and tilted by <em>roll</em> degrees.</font></p>
+    <p><font color="#000000">This function is used extensively by
+    the </font><a href="p3dc_CMRA.html"><font color="#000000">camera</font></a><font
+    color="#000000"> code to provide the basic world to view
+    transformation.</font></p>
+</blockquote>
+
+<blockquote>
+    <p><font color="#000000"></font>&nbsp;</p>
+</blockquote>
+
+<blockquote>
+    <p><font color="#000000"></font>&nbsp;</p>
+</blockquote>
+</body>
+</html>

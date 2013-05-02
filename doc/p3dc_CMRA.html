@@ -1,0 +1,988 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Cameras</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Cameras</h1>
+
+<p>This page describes cameras and their use in Project: 3D
+Craft. This section is broken into three parts, a discussion of
+cameras, a discussion of the <font color="#800040"
+face="Times New Roman"><code><strong>p3dc_CMRA</strong></code></font>
+type, and then the APIs that take cameras as their first
+parameter (the Camera API). </p>
+
+<ul>
+    <li><a href="#Definitions">Definitions and types related to
+        cameras in P3DC</a><ul>
+            <li><a href="#p3dc_CMRA">p3dc_CMRA</a></li>
+            <li><a href="#p3dc_VIEW">p3dc_VIEW</a></li>
+        </ul>
+    </li>
+    <li><a href="#description">How Cameras Work</a><ul>
+            <li><a href="#descr0">The World to View
+                Transformation Matrix</a></li>
+            <li><a href="#descr1">The View to Screen
+                Transformation</a></li>
+            <li><a href="#descr2">That Scary Subject of Clipping</a></li>
+            <li><a href="#descr3">Putting it All Together</a></li>
+        </ul>
+    </li>
+    <li><a href="#cameraapi">The Camera API</a><ul>
+            <li><a href="#cameraapi1">The Generic Programming
+                Interface</a><ul>
+                    <li><a href="#p3dc_new_camera"><em>p3dc_new_camera</em></a></li>
+                    <li><a href="#p3dc_init_camera"><em>p3dc_init_camera</em></a></li>
+                    <li><a href="#p3dc_set_camera"><em>p3dc_set_camera</em></a></li>
+                </ul>
+            </li>
+            <li><a href="#cameraapi2">Setting Specific parameters
+                on Cameras</a><ul>
+                    <li><a href="#p3dc_set_camera_fov"><em>p3dc_set_camera_fov</em></a></li>
+                    <li><a href="#p3dc_set_camera_origin"><em>p3dc_set_camera_origin</em></a></li>
+                    <li><a href="#p3dc_set_camera_dir"><em>p3dc_set_camera_dir</em></a></li>
+                    <li><a href="#p3dc_set_camera_target"><em>p3dc_set_camera_target</em></a></li>
+                    <li><a href="#p3dc_set_camera_near"><em>p3dc_set_camera_near</em></a></li>
+                    <li><a href="#p3dc_set_camera_far"><em>p3dc_set_camera_far</em></a></li>
+                    <li><a href="#p3dc_set_camera_screen"><em>p3dc_set_camera_screen</em></a></li>
+                    <li><a href="#p3dc_set_camera_view"><em>p3dc_set_camera_view</em></a></li>
+                    <li><a href="#p3dc_set_camera_roll"><em>p3dc_set_camera_roll</em></a></li>
+                    <li><a href="#p3dc_set_camera_pitch"><em>p3dc_set_camera_pitch</em></a></li>
+                    <li><a href="#p3dc_set_camera_yaw"><em>p3dc_set_camera_yaw</em></a></li>
+                    <li><a href="#p3dc_set_camera_window"><em>p3dc_set_camera_window</em></a></li>
+                    <li><a href="#p3dc_set_camera_frame"><em>p3dc_set_camera_frame</em></a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<hr>
+
+<h2><a name="Definitions">Definitions</a> and types related to
+Cameras</h2>
+
+<h3>Definition -- <a name="p3dc_CMRA"><font size="3"
+face="Courier New">p3dc_CMRA</font></a></h3>
+
+<p>The <strong>p3dc_CMRA</strong> type is used to define all of
+the properties of a virtual camera. </p>
+<div align="left">
+
+<table border="1" cellpadding="2" width="90%">
+    <tr>
+        <th align="left" width="33%" bgcolor="#000000"><font
+        color="#FFFFFF"><strong>Member</strong></font></th>
+        <th align="left" width="33%" bgcolor="#000000"><font
+        color="#FFFFFF"><strong>Type</strong></font></th>
+        <th align="left" width="34%" bgcolor="#000000"><font
+        color="#FFFFFF"><strong>Description</strong></font></th>
+    </tr>
+    <tr>
+        <td><em>origin</em></td>
+        <td>p3dc_PNT3</td>
+        <td>This is the location of the camera in the world. The
+        vector from it to the <em>look</em>-at point defined
+        below is the view's Z axis.</td>
+    </tr>
+    <tr>
+        <td width="33%"><em>look</em></td>
+        <td width="33%">p3dc_PNT3</td>
+        <td width="34%">This is the point in the world where the
+        camera is supposed to point. By default it is 0,0,0</td>
+    </tr>
+    <tr>
+        <td><em>up</em></td>
+        <td>p3dc_PNT3</td>
+        <td>This is a unit vector that defines &quot;up&quot; for
+        the camera. It is an error to have the <em>look-</em>at
+        vector and the <em>up</em> vector match.</td>
+    </tr>
+    <tr>
+        <td><em>twist</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This is defined is a rotation about the camera's Z
+        axis. It is currently defined as being defined to occur <em>before</em>
+        camera re-location.</td>
+    </tr>
+    <tr>
+        <td><em>far_p</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This value defines the &quot;back&quot; of the
+        viewing frustum. Anything beyond this point is clipped
+        out of existence.</td>
+    </tr>
+    <tr>
+        <td><em>near_p</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This is the distance from the camera origin to the
+        'near' plane. If the near plane is the screen this would
+        be 0.</td>
+    </tr>
+    <tr>
+        <td><em>fov</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This is the field of view for the camera. It must be
+        greater than 0 and less than 180 degrees. Attempting to
+        set it to values outside this range is undefined.</td>
+    </tr>
+    <tr>
+        <td><em>W2V</em></td>
+        <td>p3dc_XFRM</td>
+        <td>This transform will transform a point from world
+        co-ordinates into this camera's viewing co-ordinates. It
+        is affine and does no perspective projection. I use it
+        for models that are moving about in the world.</td>
+    </tr>
+    <tr>
+        <td><em>V2S</em></td>
+        <td>p3dc_XFRM</td>
+        <td>This is the &quot;view-to-screen&quot; transform and
+        contains the perspective projection of the transformed
+        world view on to the 2D screen view.</td>
+    </tr>
+    <tr>
+        <td><em>view_xfrm</em></td>
+        <td>p3dc_XFRM</td>
+        <td>This transform is the product of W2V*V2S and will
+        transform a point from the world, into the view space of
+        the camera, apply a perspective projection and make the
+        point ready for clipping. It is used extensively when
+        drawing the scene on the screen.</td>
+    </tr>
+    <tr>
+        <td><em>vp</em></td>
+        <td>p3dc_VIEW</td>
+        <td>This field is a view port that is used by the GAL
+        layer to convert from camera co-ordinates into screen
+        co-ordinates. (see below)</td>
+    </tr>
+</table>
+</div>
+
+<h3>Definition -- <a name="p3dc_VIEW"><font size="3"
+face="Courier New">p3dc_VIEW</font></a></h3>
+
+<p>The <strong>p3dc_VIEW </strong>type is used to define the
+mapping between a camera and the screen. The camera realizes the
+scene in ideal (i.e. -1.0, 1.0) co-ordinates and the view is used
+to map those into screen co-ordinates. </p>
+<div align="left">
+
+<table border="1" cellpadding="2" width="90%">
+    <tr>
+        <th align="left" width="33%" bgcolor="#000000"><font
+        color="#FFFFFF">Member</font></th>
+        <th align="left" width="33%" bgcolor="#000000"><font
+        color="#FFFFFF">Type</font></th>
+        <th align="left" width="34%" bgcolor="#000000"><font
+        color="#FFFFFF">Description</font></th>
+    </tr>
+    <tr>
+        <td width="33%"><em>scale_x</em></td>
+        <td width="33%">p3dc_FLOAT</td>
+        <td width="34%">Scaling factor to convert from -1.0 to
+        1.0 into screen co-ordinates.</td>
+    </tr>
+    <tr>
+        <td><em>scale_y</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>Scaling factor for the vertical screen access to
+        convert from -1.0 to 1.0 in Y space.</td>
+    </tr>
+    <tr>
+        <td><em>center_x</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This represents the screen X co-ordinate of point
+        &quot;0,0&quot;.</td>
+    </tr>
+    <tr>
+        <td><em>center_y</em></td>
+        <td>p3dc_FLOAT</td>
+        <td>This represents the screen Y co-ordinate for point
+        &quot;0,0&quot;.</td>
+    </tr>
+</table>
+</div>
+
+<hr>
+
+<h2><a name="description">How P3DC Cameras Work</a></h2>
+
+<p>In the &quot;real&quot; world, cameras focus light through
+lenses on to either a piece of film or a light sensitive detector
+of some kind (say a CCD). The result is that a 3-dimensional
+scene is rendered on to the plane of the detector/film/whatever.
+What certainly wasn't so clear to me was how to simulate that in
+a computer program.</p>
+
+<p>The <font face="Times New Roman"><code><strong>p3dc_CMRA</strong></code></font>
+data structure is one of the more important ones in the library.
+This structure defines a &quot;view&quot; into the 3-D world that
+projects on to a rectangular 2-D plane (the screen). The camera
+structure has three main parts:</p>
+
+<ol>
+    <li>The transformation from the world co-ordinate space into
+        the camera's view space;</li>
+    <li>The transformation from the camera's view space to the
+        2-D projection plane (a.k.a. screen space);</li>
+    <li>The scaling from idealized screen space into actual
+        screen space.</li>
+</ol>
+
+<p>These components form the basis of a simple viewing system and
+the camera API is all about manipulating these transforms to
+simulate putting the camera at a particular point in space and
+pointing it at something. </p>
+
+<p>This viewing system is incomplete in that it is not as general
+as the PHIGS system or others where the perspective reference
+point (PRP) can be specified, instead, the PRP is always centered
+in the view.</p>
+
+<p>The camera system does however let you set a variety of
+parameters to suit your needs. In particular it allows you to set
+the &quot;near&quot; and &quot;far&quot; clipping planes, the
+&quot;twist&quot; of the camera, its &quot;up&quot; vector, where
+it is &quot;looking&quot;, and its is &quot;location.&quot; Each
+of these parameters are represented in the structure by the
+fields, <em>near_p</em>, <em>far_p</em>, <em>twist</em>, <em>up</em>,
+<em>look</em>, and <em>origin</em>. The parameters are combined
+to create the transforms necessary to render a particular view.
+The result of all the camera calculations is a matrix, <em>view_xfrm</em>,
+that is used to render the scene.</p>
+
+<p>Once the camera is set up, you call the <a
+href="p3dc_DRAW.html">rendering API</a> to draw the scene with
+that camera's transforms and then display the resulting frame.</p>
+
+<h4><a name="descr0"><font color="#0080C0">The World to View
+Transformation Matrix</font></a></h4>
+
+<p>Step one in initializing a camera is figuring out how to
+transform world co-ordinates such that the camera's origin is at
+0,0,0 and the Z axis points straight away from the camera (into
+the screen). This computation is done using the function <a
+href="p3dc_XFRM.html#p3dc_camera_xfrm"><em>p3dc_camera_xfrm</em></a>.
+This function does its work by working backward from what you
+want, let me explain.</p>
+
+<p>The <font face="Times New Roman"><code><strong>p3dc_CMRA</strong></code></font>
+structure contains the origin of the camera <font color="#FF0000"><strong>O</strong></font>
+(I'm using upper case letters to indicate vectors. Vectors have
+three scalar components x, y, z) and the point in space where the
+camera is looking <font color="#FF0000"><strong>L</strong></font><strong>.
+</strong>Using these to co-ordinates in world space we can
+compute the unit vector that points from <font color="#FF0000"><strong>O</strong></font>
+to <font color="#FF0000"><strong>L</strong></font> by performing
+the vector subtraction of <font color="#FF0000"><strong>L</strong></font>
+and <font color="#FF0000"><strong>O</strong></font> and
+normalizing the result like so:</p>
+
+<blockquote>
+    <p><font color="#FF0000"><strong>F = | L - O |</strong></font></p>
+</blockquote>
+
+<p>The result, <font color="#FF0000"><strong>F</strong></font>,
+is the <em>z</em> axis of the new view. (This vector is called <font
+color="#FF0000"><strong>F</strong></font> to distinguish it from
+the world's <em>z</em> axis, the view's three basis vectors are <font
+color="#FF0000"><strong>R</strong></font>ight, <font
+color="#FF0000"><strong>U</strong></font>p, and <font
+color="#FF0000"><strong>F</strong></font>orward which related to <em><strong>x</strong></em>,<em><strong>
+y</strong></em>, and <em><strong>z</strong></em> in a standard
+Cartesian system.) To compute <font color="#FF0000"><strong>R</strong></font>,
+the view's <em>x</em> axis, we compute the cross product of the <em>up</em>
+vector stored in the <font face="Times New Roman"><code><strong>p3dc_CMRA</strong></code></font>
+and the just computed <font color="#FF0000"><strong>F</strong></font>
+vector and normalize it to be a unit vector. This can be written
+as:</p>
+
+<blockquote>
+    <p><font color="#FF0000"><strong>R = | </strong><em><strong>up</strong></em><strong>
+    x F |</strong></font></p>
+</blockquote>
+
+<p>At this point we have two of the final basis vectors (<font
+color="#FF0000"><strong>F</strong></font> and <font
+color="#FF0000"><strong>R</strong></font>). With these two
+vectors we can compute the up vector, <font color="#FF0000"><strong>U</strong></font>,
+by computing the cross product of <font color="#FF0000"><strong>F</strong></font>
+and <font color="#FF0000"><strong>R</strong></font><strong> </strong>and
+normalizing the result like so:</p>
+
+<blockquote>
+    <p><font color="#FF0000"><strong>U = | R x F |</strong></font></p>
+</blockquote>
+
+<p>After figuring out the desired <font color="#FF0000"><strong>U</strong></font>
+vector we have the basis vectors for the view transform. (<font
+color="#FF0000"><strong>R</strong></font>,<strong> </strong><font
+color="#FF0000"><strong>U</strong></font>,<strong> </strong>and <font
+color="#FF0000"><strong>F</strong></font>.) </p>
+
+<p>Now the twist of the camera has to be factored into the
+matrix. The twist of the camera is the rotation of the camera
+about its own Z axis. This computation is done by multiplying
+this view transform with another transform that rotates about the
+<font color="#FF0000"><strong>F</strong></font> axis. This
+results in a new set of basis vectors for the view which I call <font
+color="#FF0000"><strong>R'</strong></font>, <font color="#FF0000"><strong>U'</strong></font>
+and <font color="#FF0000"><strong>F'</strong></font>. Note that
+there is one bit of cleverness going on here that isn't
+immediately obvious. The camera transform is an <em>inverse </em>transform
+which means it spins the world about as opposed to camera
+spinning about. Since the matrix that is computed is both <em>affine</em>
+and <em>orthonormal</em> the inverse of the matrix can be
+computed by swapping the rows and columns. Thus where I would put
+each vector into a column in a 'regular' matrix I put the
+camera's view vectors into the resulting matrix in rows.</p>
+
+<p>The final step is to place the camera origin in this new
+space. That could be represented as:</p>
+
+<pre><font face="Times New Roman">    </font><font
+color="#FF0000" face="Times New Roman">    <strong>	| R'</strong><sub><strong>x</strong></sub><strong> R'</strong><sub><strong>y</strong></sub><strong> R'</strong><sub><strong>z</strong></sub><strong> | 
+     	P = 	| U'</strong><sub><strong>x</strong></sub><strong> U'</strong><sub><strong>y</strong></sub><strong> U'</strong><sub><strong>z</strong></sub><strong> | | O</strong><sub><strong>x</strong></sub><strong> O</strong><sub><strong>y</strong></sub><strong> O</strong><sub><strong>z</strong></sub><strong> |
+		| F'</strong><sub><strong>x</strong></sub><strong> F'</strong><sub><strong>y</strong></sub><strong> F'</strong><sub><strong>z</strong></sub><strong> | </strong></font></pre>
+
+<p>The transformed origin, referred to above as P, is placed with
+the view basis vectors into the 4 x 4 transformation matrix to
+complete the world to view transformation as follows: </p>
+
+<pre><font face="Times New Roman">    </font><font
+color="#FF0000" face="Times New Roman">    <strong>	| R'</strong><sub><strong>x</strong></sub><strong> R'</strong><sub><strong>y</strong></sub><strong> R'</strong><sub><strong>z</strong></sub><strong>  P</strong><sub><strong>x</strong></sub><strong> |
+     		| U'</strong><sub><strong>x</strong></sub><strong> U'</strong><sub><strong>y</strong></sub><strong> U'</strong><sub><strong>z</strong></sub><strong> P</strong><sub><strong>y</strong></sub><strong> |
+		| F'</strong><sub><strong>x</strong></sub><strong> F'</strong><sub><strong>y</strong></sub><strong> F'</strong><sub><strong>z</strong></sub><strong> P</strong><sub><strong>z</strong></sub><strong> |
+ 		| 0     0     0   1  |</strong></font></pre>
+
+<p>The result of these computations is stored in the camera's <strong>W2V</strong>
+transform. The <strong>W2V</strong> transformed is used by the
+model code as well as part of the computation of the models
+eventual model space to screen space transformation.</p>
+
+<h4><a name="descr1"><font color="#0080C0">The View To Screen
+Transformation</font></a></h4>
+
+<p>Now for something a bit different. Going from the view on to
+the screen.</p>
+
+<p>Going from view to screen is easy when you understand it, and
+impossibly opaque when you don't. This is where you need to know
+a bit about matrix math to understand exactly how the Perspective
+Transformation actually works.</p>
+
+<p>To start, lets explain how perspective works. When you look at
+something light from all directions in front of you is converging
+on your eyeball and then getting fed to your optic nerve. This
+can be modeled as a &quot;pin hole&quot; camera. (Using a
+pin-hole camera is preferable since there are no focal length and
+focal depth issues associated with them). Things that are closer
+obscure more of your vision than things that are farther away.
+Thus the things farther away look smaller although your brain
+auto-compensates and tells you they aren't really small at all.</p>
+
+<p>The typical &quot;newbie&quot; way of achieving a perspective
+view then is to divide the X and Y view co-ordinates by Z before
+drawing them on the screen. The newbie technique works well and
+is satisfactory for many game situations or times when control of
+the view isn't critical.</p>
+
+<p>I of course wanted to know exactly what it <em>meant</em> to
+divide by Z and that lead me to reading several discussions on
+the perspective transformation.</p>
+
+<p><a href="images/pin-hole.gif"><img
+src="images/pin-hole-thumb.gif" align="right" border="0"
+hspace="0" width="120" height="85"></a>The bottom line is that
+you can think of a pin hole camera as defining two right
+triangles, as shown in the image to the right (click on it for a
+larger view). The value <em>H</em> is reflected through the
+pin-hole to the value <em>h</em> behind it. Scaling of <em>H </em>to
+<em>h</em> is defined by the ratio of <em>H </em>to <em>D</em>
+which, from basic geometry of similar triangles, is identical to
+the ratio of <em>h</em> to <em>d</em>. Further, the ratio is
+related to the angle <font face="Symbol">a</font> which is called
+the &quot;field of view.&quot; </p>
+
+<p>So if you fix the field of view to be 90º then the angle in
+the right triangle becomes 45º and the ratio between <em>D</em>
+and <em>H</em> is 1.0. Thus simply dividing your X and Y
+coordinate by Z is a simple way of implementing a perspective
+transformation with a fixed field of view of 90º.</p>
+
+<p>But what about other fields of view and why are they
+important? Looking at the figure above you can probably see that
+if the field of view is narrower then the distance at <em>H </em>will
+be shorter. However, the screen remains the same size, so
+displaying less of the view on the same size screen causes the
+perception that the view is enlarged or zoomed.</p>
+
+<p>Looking at documentation on 35MM camera lenses it became clear
+that what defined a &quot;tele-photo&quot; lens is the distance
+of its focal length. The focal length of the lens is just <em>d</em>
+in the figure, and since <em>h</em> is fixed, changing the focal
+length changes the field of view. Longer focal length, smaller
+field of view, and <em>larger</em> zoom factor.</p>
+
+<p>So to manage zooming in our simulated camera we need to do
+something to the X and Y co-ordinates and that something is we
+need to scale them. How much? By the same ratio <em>d/h</em> that
+we used when figuring out the relationship of <em>H</em> to <em>h</em>.
+To do this with a matrix is easy, we put the value <em>d/h</em>
+into the [0,0] and [1,1] locations and that does the scaling for
+us. But we aren't quite done. We are transforming from the view
+to the screen and it will be rare that everything in the screen
+will fit, so we will have to clip the scene to the screen
+boundaries. </p>
+
+<h4><a name="descr2"><font color="#0080C0">That Scary Subject of
+&quot;Clipping&quot;</font></a></h4>
+
+<p>A lot of people get confused by clipping. I know I did, and
+still do now and then, but I think I've got it nailed now. I
+implement clipping using the <a href="clipping.html">Sutherland-Hodgman</a>
+clipping algorithm. Which is a very simple algorithm for walking
+the vertices of a polygon, and inserting new vertices whenever
+the current vertex and the next vertex are on different sides of
+the clipping view. But what is the clipping view?</p>
+
+<p>Imagine for a moment that you want to clip in 3-D and to
+simplify things you make some assumptions which are:</p>
+
+<ol>
+    <li>The camera is sitting at 0, 0, 0 and looking right down
+        the Z axis (which increases as it goes &quot;away&quot;
+        from the screen.)</li>
+    <li>The view you are looking at is square.</li>
+    <li>The farthest left edge of the view has the x co-ordinate
+        -1.0, the farthest rightmost edge has the co-ordinate
+        1.0.</li>
+    <li>The topmost edge of the view has y co-ordinate 1.0 and
+        the lowermost edge has y co-ordinate -1.0.</li>
+    <li>Everything in front of the camera has a z co-ordinate
+        greater than 0.0 and the farthest anything should be is
+        at z co-ordinate 1.0.</li>
+</ol>
+
+<p>This is a pretty easy space to clip to right? Just check to
+see if -1.0 &lt; <em>x</em> &lt; 1.0, and -1.0 &lt; <em>y </em>&lt;
+1.0, and finally 0.0 &lt; <em>z </em>&lt; 1.0. If a vertex is
+beyond one of those boundaries then you need to clip it because
+the &quot;view&quot; is only what is inside the box. </p>
+
+<p>As it turns out this is exactly what Sutherland-Hodgman does
+and it does it by considering each polygon in the scene. The
+algorithm starts with the second vertex (remember the minimum
+polygon is a triangle which has three vertices!) and compares it
+with the previous vertex. If both are outside the box, nothing
+happens, if one is inside and one is outside the box then a new
+vertex is created and &quot;output&quot; where the line segment
+transitions to being &quot;inside&quot; the box, and if both are
+inside then the current vertex is output and the next step is
+done. When the last vertex is reached the algorithm &quot;rolls
+over&quot; to the first vertex (remember it skipped it at the
+start) and compares the first vertex to the last vertex
+outputting it as appropriate. If the list of
+&quot;outputted&quot; vertices is zero then the polygon is
+outside the box completely, otherwise the new list is the clipped
+version of the polygon.</p>
+
+<p>Note that the algorithm operates on each plane intersection
+test (x &lt; -1.0 for example) iteratively. The result of running
+this algorithm for all of the plane intersection tests (x &gt;
+-1.0, x &lt; 1.0, y &gt; -1.0, ... ) is a polygon that is
+completely inside the box.</p>
+
+<p>Yes, this takes up some computer time to do, however most
+polygons do <em>not</em> need to be clipped and this step can be
+skipped on those polygons that are completely visible. A very
+fast visibility test is done with <em>outcodes</em> and is
+described in the source.</p>
+
+<p>&quot;But how do we get to this 'ideal' world?&quot; With a
+transformation of course! Remember that that by scaling the <em>x</em>
+and <em>y</em> values by the ratio of the field of view triangle
+we converted from an arbitrary field of view to a 90 field of
+view? Well in that view we can make a box by dividing <em><strong>x</strong></em>
+and <em><strong>y</strong></em> by <em><strong>z</strong></em>!
+So now Xs = <em><strong>x</strong></em> / <em><strong>z</strong></em>
+and when <em><strong>z</strong></em> = <em><strong>x</strong></em>,
+Xs will be 1.0 ! But that is a lot of divisions that we would
+just as soon avoid so instead of comparing <em><strong>x</strong></em>
+to 1.0 we can simply compare <em><strong>x</strong></em> to <em><strong>z</strong></em>!</p>
+
+<p>So I make two changes to the V2S matrix, in addition to the x
+and y scaling I add to [3,2] the value 1.0, to [3,3] the value
+0.0, and to [2,2] and [2,3] the values <em>1 / (far_p - near_p)</em>
+and <em>-near_p / (far_p - near_p)</em> respectively. This makes
+the matrix look like this:</p>
+
+<pre> | d/h  0.0          0.0                 0.0        |
+ | 0.0  d/h          0.0                 0.0        |
+ |                   1.0              - near_p      |
+ | 0.0  0.0    ----------------   ----------------- |
+ |             (far_p - near_p)    (far_p - near_p) |
+ | 0.0  0.0          1.0                 0.0        |</pre>
+
+<p>And when I multiply by this matrix there are a couple of
+interesting effects. The fourth element 'w' in the resulting
+vector <strong>R </strong>becomes <em>Rw = Vx * 0.0 + Vy * 0.0 +
+Vz * 1.0 + Vw * 0.0</em>, or more simply the value of <em>Vz</em>
+gets copied into <em>Rw</em>. And the value in <em>Rz</em> gets
+computed as <em>Rz = Vx * 0.0 + Vy * 0.0 + Vz /(far_p-near_p) +
+(Vw * near_p) / (far_p - near_p)</em> and since <em>Vw</em> is
+always 1.0 that reduces (with a bit of algebra) to <em>Rz = (Vz -
+near_p)/(far_p - near_p)</em>. Which, if you were to map it out,
+re-maps <em>Rz</em> to be a number that moves linearly between 0
+when <em>Vz = near_p </em>and 1.0 when <em>Vz = far_p</em>. This
+linearity is used to our advantage to get the maximum resolution
+out of the 16 bit <em>w-buffer</em> available on the Voodoo style
+hardware accelerator.</p>
+
+<p>Finally, the view port may not be square, and as such the
+ratio of the width to the height is not 1.0. To correct for a
+non-square view port, the term in location [0,0] is multiplied by
+the ratio of the width to the height to &quot;squeeze&quot; the
+box along its width when doing clipping calculations.</p>
+
+<h4><a name="descr3"><font color="#0080C0">Putting It All
+Together</font></a></h4>
+
+<p>After computing the world to view, and view to screen
+transformations, the results are multiplied to create the final
+composite transformation and stored in the structure member <em>view_xfrm.
+</em>Additionally the structure <em>VP</em> which is of type <font
+face="Times New Roman"><code><strong>p3dc_VIEW</strong></code></font>
+contains the scaling factor for the screen <em>x</em> and screen <em>y
+</em>co-ordinates. The rendering pipeline then works as follows:</p>
+
+<ol>
+    <li>For each vertex in a drawable &quot;primitive&quot;
+        (line, polygon, etc) :<ol>
+            <li>The vertex is transformed using the transform in <em>view_xfrm</em>.</li>
+            <li>The &quot;outcode&quot; is computed to determine
+                if that vertex is not visible.</li>
+        </ol>
+    </li>
+    <li>The &quot;primitive&quot; is clipped and then passed to
+        the hardware layer.</li>
+    <li>The hardware layer computes screen co-ordinates as
+        follows:<ul>
+            <li>ScreenX = vertex-&gt;x / vertex-&gt;w *
+                view-&gt;scale_x + view-&gt;center_x;</li>
+            <li>ScreenY = vertex-&gt;y / vertex-&gt;w *
+                view-&gt;scale_y + view-&gt;center_y;</li>
+            <li>Depth<sup>1</sup> = 1.0 / vertex-&gt;z * 65535.0
+                + 1.0;</li>
+        </ul>
+    </li>
+</ol>
+
+<p><font size="2">1. Note that the depth computation is pretty
+specific to the 3Dfx hardware. The &quot;one over w&quot; or oow
+value ranges from 1/1.0 to 1/65536 using this technique.</font></p>
+
+<p>Once the hardware layer has the screen co-ordinates and the
+depth it has all the information necessary to render the
+primitive into the frame buffer. When the frame buffer is made
+visible to the user, the user sees the 3-D world rendered from
+the viewpoint of the &quot;camera&quot; in world space. Voila'
+we're done!</p>
+
+<hr>
+
+<h2><a name="cameraapi">Camera Application Programming Interface</a></h2>
+
+<p>These are the interfaces that are used to allocate, free, and
+manipulate cameras.</p>
+
+<p><em>p3dc_CMRA *</em><a name="p3dc_new_camera"><strong>p3dc_new_camera</strong></a><strong>(</strong><em>
+p3dc_FLOAT fov, p3dc_FLOAT x, y, z</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This function allocates a new camera from the heap and
+    initializes the camera's transforms based on the field of
+    view passed in as <em>fov</em> and the position in <em>x, y, </em>and
+    <em>z</em>. The<em> look-at</em> point is assumed to be (0,
+    0, 0) and the <em>up</em> direction of the camera is assumed
+    to be the same as the world's Y axis.</p>
+</blockquote>
+
+<p><em>void</em> <a name="p3dc_init_camera"><strong>p3dc_init_camera</strong></a><strong>(</strong><em>p3dc_CMRA
+*cam, p3dc_FLOAT fov, p3dc_FLOAT x, y, z</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This interface initializes (or re-initializes) a <strong>p3dc_CMRA</strong>
+    structure. The camera's <em>look-at</em> point is presumed to
+    be (0, 0, 0) and the up vector is presumed to be the world's
+    positive Y axis.</p>
+</blockquote>
+
+<h4><a name="cameraapi1"><font color="#0080C0">Setting Camera
+Parameters - In Bulk</font></a></h4>
+
+<p>The parameters that control the field of view, clipping
+boundaries, etc, can be set individually or by using the very
+flexible <em>p3dc_set_camera</em> interface. Each of these
+interfaces is defined as <em>p3dc_set_camera_XXX</em> where <em>XXX</em>
+is the parameter of interest. </p>
+
+<p>A couple of notes you should be aware of:</p>
+
+<ol>
+    <li>Some of these function calls are simply #defines in
+        p3dc.h rather than actual function calls. The #defines
+        rewrite the call in terms of a call to <em>p3dc_set_camera</em>.
+    </li>
+    <li>When you call <em>p3dc_set_camera</em> with multiple
+        parameters it tries to apply them in order so that you
+        get the expected results. However some sets, such as the
+        &quot;look&quot; point will invalidate any previous
+        changes to the camera orientation.</li>
+</ol>
+
+<p><em>int</em><strong> </strong><a name="p3dc_set_camera"><strong>p3dc_set_camera</strong></a><strong>(</strong><em>
+p3dc_CMRA *camera, int parameter, ... , 0</em><strong> )</strong></p>
+
+<blockquote>
+    <p>This is the generic version of the camera parameter
+    setting code. There are several parameters that can be set,
+    they are identified by a constant and take at least one
+    parameter. Parameters are passed to the function call as
+    parameter/argument tuples. In all cases the argument is
+    currently a pointer but this may change with future
+    parameters. The constants and their parameters are:</p>
+    <div align="center"><center><table border="2" cellpadding="2"
+    width="80%" bordercolor="#0080C0" bordercolordark="#0080C0"
+    bordercolorlight="#0080C0">
+        <tr>
+            <th align="left" width="33%" bgcolor="#000000"><font
+            color="#FFFFFF">Parameter</font></th>
+            <th align="left" width="33%" bgcolor="#000000"><font
+            color="#FFFFFF">Argument</font></th>
+            <th align="left" width="34%" bgcolor="#000000"><font
+            color="#FFFFFF">Description</font></th>
+        </tr>
+        <tr>
+            <td width="33%"><font size="2"><strong>P3DC_CAMERA_ORIGIN</strong></font></td>
+            <td width="33%">p3dc_PNT3 *origin</td>
+            <td width="34%">The x, y, and z components of <em>origin</em>
+            are used to define the new location of the camera in
+            world space.</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_VIEW</strong></font></td>
+            <td>p3dc_XFRM *transform</td>
+            <td>The contents of <em>transform </em>are copied
+            into the camera's W2V transform and the view
+            transform is recomputed.</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_SCREEN</strong></font></td>
+            <td>p3dc_XFRM *transform</td>
+            <td>The contents <em>transform</em> are copied into
+            the camera's V2S transform and the view transform is
+            recomputed.</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_ROLL</strong></font></td>
+            <td>p3dc_FLOAT *angle</td>
+            <td>A rotation of <em>angle</em> degrees is applied
+            to the camera's world to view transform about the
+            local Z axis.<em> Note: roll is relative to the
+            current position, not the &quot;up&quot; vector.</em></td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_YAW</strong></font></td>
+            <td>p3dc_FLOAT *angle</td>
+            <td>A rotation of <em>angle</em> degrees is applied
+            to the camera's world to view transform about the
+            local Y axis. <em>Note: yaw angle is relative to the
+            current position.</em></td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_PITCH</strong></font></td>
+            <td>p3dc_FLOAT *angle</td>
+            <td>A rotation of <em>angle</em> degrees is applied
+            to the camera's world to view transform about the
+            local X axis. <em>Note: pitch angle is relative to
+            the current position.</em></td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_FOV</strong></font></td>
+            <td>p3dc_FLOAT *angle</td>
+            <td>The camera's field of view is set to <em>angle</em>
+            degrees. This will force the V2S transform to be
+            recomputed from the camera's parameters.</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_UP</strong></font></td>
+            <td>p3dc_PNT3 *up</td>
+            <td>The camera's notion of &quot;up&quot; is set to
+            be equal to the <em>up</em> parameter. Cameras are
+            initialized with an up parameter of (0, 1, 0) (the
+            world Y axis).</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_FAR</strong></font></td>
+            <td>p3dc_FLOAT *dist</td>
+            <td>The camera's far clipping plane is set to <em>dist</em>.
+            Objects that are farther away than this distance will
+            not be rendered on the screen. Camera's initially
+            have a far clipping plane set to 2048.0</td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_NEAR</strong></font></td>
+            <td>p3dc_FLOAT *dist</td>
+            <td>The camera's near clipping plane is set to <em>dist</em>.
+            Objects that are closer than this are clipped. This
+            value must be greater than or equal to 1.0. </td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_TWIST</strong></font></td>
+            <td>p3dc_FLOAT *angle</td>
+            <td>The cameras twist is set to <em>angle</em>.
+            Unlike roll above this is specified in degrees from
+            the camera's local Up vector. </td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_LOOK</strong></font></td>
+            <td>p3dc_PNT3 *target</td>
+            <td>The camera is oriented to look at <em>target</em>
+            in world co-ordinates. </td>
+        </tr>
+        <tr>
+            <td><font size="2"><strong>P3DC_CAMERA_DIR</strong></font></td>
+            <td>p3dc_PNT3 *normal</td>
+            <td>The cameral is aligned the normal vector <em>normal</em>
+            in world space.</td>
+        </tr>
+    </table>
+    </center></div><p>Once all parameters and their arguments are
+    included, you <em>must</em> include a 0 to indicate the end
+    of the list. This is a source of bugs, sorry about that. As a
+    usage example, consider locating a camera at 10, 5, -5 and
+    pointing it at the point 5, 5, 5:</p>
+    <blockquote>
+        <pre><font size="2" face="Courier New">p3dc_CMRA *cam = p3dc_new_camera(...);
+p3dc_PNT3 location, interest;
+location.x = 10; location.y = 5; location.z = -5;
+interest.x = 5; interest.y = 5; interest.z = 5;
+p3dc_set_camera(cam, P3DC_CAMERA_ORIGIN, &amp;location, P3DC_CAMERA_LOOK, &amp;interest, 0);
+
+...</font></pre>
+    </blockquote>
+    <p>In the above example the camera is located and pointed in
+    the same call to <em>p3dc_set_camera</em>.</p>
+</blockquote>
+
+<h4><a name="cameraapi2"><font color="#0080C0">Setting Camera
+Parameters - Individually</font></a></h4>
+
+<p>While the above routine is technically all you need, sometimes
+it is convenient to set the camera's parameters individually,
+this also allows for some nicer syntax. These routines should all
+call <em>p3dc_set_camera</em> or just be #defines to calls to <em>p3dc_set_camera
+</em>however given the evolutionary nature of the code not all of
+them are yet.</p>
+
+<p><em>void</em><strong> </strong><a name="p3dc_set_camera_fov"><strong>p3dc_set_camera_fov</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT fov</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function sets the field of view of the camera to be <em>fov</em>.
+    This has the same effect as a &quot;zoom&quot; lens in that
+    the narrower the field of view, the more magnified the view
+    appears. Note that this changes affects the <em>V2S</em>
+    transform but not the <em>W2V</em> transform in the camera
+    structure.</p>
+</blockquote>
+
+<p><em>void</em> <a name="p3dc_set_camera_target"><strong>p3dc_set_camera_target</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT x, y, z, p3dc_PNT3 *up, p3dc_FLOAT
+twist</em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function is one of two orientation functions for
+    cameras. This one &quot;targets&quot; the camera at a point
+    in world space and sets its &quot;up&quot; orientation. To
+    point the camera at a model (for following it for example)
+    you might use</p>
+    <blockquote>
+        <pre><font size="2" face="Courier New">p3dc_target_camera(mycamera, x, y, z, &amp;up_vector, 0);</font></pre>
+    </blockquote>
+    <p>Which would have the effect of targeting the camera at a
+    point (x, y, z) in world space, using <em>up_vector</em> as
+    its notion of up, and not twisted about the camera's view
+    vector at all. If the <em>up</em> parameter is <font size="2">NULL</font>
+    then the world Y axis is presumed to represent the up
+    direction.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_origin"><strong>p3dc_set_camera_origin</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT x, y, z</em><strong>) </strong></p>
+
+<blockquote>
+    <p>This function positions the camera at the point (x, y, z)
+    in the world. Note that the camera will re-orient itself to
+    continue looking at its &quot;look&quot; point.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_dir"><strong>p3dc_set_camera_dir</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_PNT3 *dir, *up, p3dc_FLOAT twist </em><strong>)
+</strong></p>
+
+<blockquote>
+    <p>This function is a general purpose camera orientation
+    routine. It takes a unit vector pointing in the same
+    direction that you want the camera to point, a unit vector
+    pointing in the direction of &quot;up&quot; (if this is NULL
+    then the Y axis is assumed to be pointing up) and a
+    &quot;twist&quot; value which defines how the camera is
+    rotated about its view axis. Note that twist and up are
+    related in that the camera is presumed to be at zero twist
+    when the camera's &quot;up&quot; vector is, as closely as
+    possible, aligned with the up vector. So an up vector of (0,
+    -1, 0) with a twist of 0 degrees, is equivalent to an up
+    vector of (0,1,0) with a twist of 180 degrees.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_roll"><strong>p3dc_set_camera_roll</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT angle</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function changes the camera's orientation along its
+    &quot;look&quot; vector (nominally the Z vector). Positive
+    angles roll the camera clockwise, and negative angles roll
+    the camera counter-clockwise. The roll angle is <em>relative</em>
+    to the current position and orientation of the camera. You
+    can re-zero the camera to zero roll by resetting its
+    &quot;up&quot; vector with <a href="#p3dc_set_camera"><em>p3dc_set_camera</em></a>.
+    </p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_pitch"><strong>p3dc_set_camera_pitch</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT angle </em><strong>) </strong></p>
+
+<blockquote>
+    <p>This function changes the &quot;pitch&quot; of the camera.
+    Intuitively this causes the camera to &quot;look up&quot;
+    when the angle is positive, and to &quot;look down&quot; when
+    the angles is negative. The change is <em>relative</em> to
+    the current camera position so calling this function twice
+    with an angle of 5 degrees will cause the camera to end up
+    looking up by 10 degrees (twice 5 is 10, get it?)</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_yaw"><strong>p3dc_set_camera_yaw</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT angle </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>Can you guess what this one does? Ok this function turns
+    the camera &quot;right&quot; when the angle is positive and
+    &quot;left&quot; when the angle is negative. Again the change
+    is relative to the current camera position so if you started
+    out looking straight ahead and called this once with the
+    value of 10 and once with the value of -15 for <em>angle</em>
+    then the camera would end up oriented such that it was
+    pointed 5 degrees left of where it started out.</p>
+</blockquote>
+
+<p><em>void</em><strong> </strong><a
+name="p3dc_set_camera_window"><strong>p3dc_set_camera_window</strong></a><strong>(</strong><em><strong>
+</strong></em><em>p3dc_CMRA *cam, int width, int height</em><strong>
+) </strong></p>
+
+<blockquote>
+    <p>This function sets the scaling of X and Y in the view
+    structure such that the resulting view rendered by the camera
+    will be <em>width</em> pixels wide by <em>height</em> pixels
+    high. Centered of course where the camera was centered on the
+    screen before. </p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_frame"><strong>p3dc_set_camera_frame</strong></a><strong>(
+</strong><em>p3dc_CMRA *cam, int x, int y, int width, int height </em><strong>)
+</strong></p>
+
+<blockquote>
+    <p>This function configures the camera's view so that the
+    lower left corner of the view is at [<em>x, y</em>] and the
+    camera view is <em>width </em>pixels wide by <em>height</em>
+    pixels tall. What is unclear to me is what exactly this <em>means</em>.
+    One of the areas I'm trying to figure out is the relationship
+    between camera parameters and perceived size. How do I create
+    an Ant's view of the world? A dog's? A person's ? Certainly
+    dog's eyes and people eyes are about the same size but not an
+    Ant's. And of course every thing is &quot;bigger&quot; but
+    does an ant sitting on my shoulder see the world as I do? I
+    don't think so. Lots to learn in this area.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_view"><strong>p3dc_set_camera_view</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_XFRM *new_W2V</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>I wrote this function originally to allow me to play
+    around with different ways of calculating the world to view
+    transformation. See the file <font face="Times New Roman"><code>cameratest.c</code></font>
+    for usage. It simply copies the transform into the camera and
+    recalculates the view transform based on the camera's
+    existing view to screen transform.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_screen"><strong>p3dc_set_camera_screen</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_XFRM *new_V2S</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>I wrote this function originally to allow me to play
+    around with different ways of calculating the view to screen
+    transformation. See the file <font face="Times New Roman"><code>perspective.c</code></font>
+    for usage. It simply copies the transform into the camera and
+    recalculates the view transform based on the camera's
+    existing world to view transform.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_near"><strong>p3dc_set_camera_near</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT d</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function sets the point where objects close to the
+    camera get clipped. Since our camera is a pin-hole camera
+    there is a singularity at 0 but it turns out that in reality
+    the number is nearly always 1.0 This is because it is easier
+    to think in whole numbers, however you can set this to be
+    smaller if you need to..</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_set_camera_far"><strong>p3dc_set_camera_far</strong></a><strong>(</strong><em>
+p3dc_CMRA *cam, p3dc_FLOAT MaxZ</em><strong> )</strong> </p>
+
+<blockquote>
+    <p>This function sets the farthest Z point I care about. More
+    importantly when I am rendering to the w buffer, values in Z
+    are scaled to go between 0 and this value. That helps prevent
+    clipping artifacts, and most of the time things farther away
+    than this aren't visible anyway so why bother drawing them.</p>
+</blockquote>
+
+<p><!--webbot bot="HTMLMarkup" startspan --><!--
+RCS data for document tracking.
+$Id: p3dc_CMRA.html,v 1.1 1999-10-31 11:21:38-08 cmcmanis Exp cmcmanis $
+$Log: p3dc_CMRA.html,v $
+Revision 1.1  1999-10-31 11:21:38-08  cmcmanis
+Initial revision
+
+--><!--webbot
+bot="HTMLMarkup" endspan --></p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+--------------------Configuration: lib - Win32 Debug--------------------
+Begining build with project "H:\Project3DC\win95\project\P3dc\lib\lib.dsp", with item "light.c"
+Active configuration is Win32 (x86) Static Library (based on Win32 (x86) Static Library)
+
+
+Creating temp file "c:\windows\TEMP\RSP3162.TMP" with contents </nologo /MLd /W3 /GX /Z7 /Od /I "../../../../src/include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__MSC__" /D "PARANOID_LIST" /FR"Debug/" /Fp"Debug/lib.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"H:\Project3DC\src\lib\light.c"
+>
+Creating command line "cl.exe @c:\windows\TEMP\RSP3162.TMP" 
+Compiling...
+light.c
+
+
+
+light.obj - 0 error(s), 0 warning(s)

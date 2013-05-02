@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Node data structures</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Node data structures</h1>
+
+<p>As any student in computer science can tell you, linked lists
+of things come in <em>really</em> handy. Especially when you
+don't know ahead of time how many of the things you will need.
+The use of linked lists in high performance graphics however is
+somewhat controversial. On the one hand they provide an easy way
+to express dynamically extensible lists of things like vertices,
+on the other hand they are a bit slower to access than fixed
+arrays. Because of this performance hit many people believe that
+they have no place in an engine that expects to get the maximum
+rendering performance out of the system.</p>
+
+<p>My philosophy on nodes is simple, they make my life easier and
+that is good. They make the code more flexible and that is good.
+They slow things down a bit, and that is bad, but since I started
+this project the speed of my &quot;desktop&quot; system has
+doubled, so being a bit slower is irrelevant. </p>
+
+<p>Finally, the current node system creates both singly and
+doubly linked lists as well as sorted binary search trees with
+the same node structure, however there are different function
+calls for BSTs vs lists. This will be corrected in a later
+release by adding typing information to the node structure.</p>
+
+<hr>
+
+<p>The following functions operated on nodes</p>
+
+<p><em>p3dc_NODE *</em><strong>p3dc_new_node(</strong><em> void
+*payload, char *name</em>, <em>int flags </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function allocates a new node (possibly recovering it
+    from the node free list) and assigns its <em>d</em> pointer
+    to the <em>payload</em> and, if <em>name</em> is non-null,
+    malloc's a string to hold a copy of the name. Initially the
+    type is unknown. The only supported flag at the moment is <strong>P3DC_NODE_FREEPAYLOAD</strong>
+    that causes the payload pointer to be freed with a called to
+    either <em>p3dc_free_type</em> or <em>p3dc_free_list</em> (if
+    its type is <strong>P3DC_LIST</strong>).</p>
+</blockquote>
+
+<p><em>void </em><strong>p3dc_free_node(</strong><em> p3dc_NODE
+*node </em><strong>)</strong> </p>
+
+<blockquote>
+    <p>This function frees the node passed to it, if the node has
+    an allocated name it frees that as well. If the <em>free_payload
+    </em>flag is true, it frees the payload pointer as well. If
+    the type of node being freed is a list then <em>p3dc_free_list</em>
+    is called on that node.</p>
+    <p>&nbsp;</p>
+</blockquote>
+
+<p>&nbsp;</p>
+</body>
+</html>

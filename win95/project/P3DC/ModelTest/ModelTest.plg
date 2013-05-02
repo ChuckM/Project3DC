@@ -1,0 +1,24 @@
+--------------------Configuration: ModelTest - Win32 Debug--------------------
+Begining build with project "H:\Project3DC\win95\project\P3dc\ModelTest\ModelTest.dsp", at root.
+Active configuration is Win32 (x86) Application (based on Win32 (x86) Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MLd /W3 /Gm /GX /Zi /Od /I "../../../../src/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/ModelTest.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
+			"OLE Type Library Maker" with flags "/nologo /D "_DEBUG" /mktyplib203 /o NUL /win32 "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "_DEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Debug/ModelTest.bsc" "
+			"COFF Linker for 80x86" with flags "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib glide2x.lib winpng.lib zlib.lib /nologo /subsystem:windows /incremental:no /pdb:"Debug/ModelTest.pdb" /debug /machine:I386 /out:"Debug/ModelTest.exe" /pdbtype:sept "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "c:\windows\TEMP\RSPD221.TMP" with contents <kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib glide2x.lib winpng.lib zlib.lib /nologo /subsystem:windows /incremental:no /pdb:"Debug/ModelTest.pdb" /debug /machine:I386 /out:"Debug/ModelTest.exe" /pdbtype:sept 
+.\Debug\modeltest.obj
+.\Debug\winmain.obj
+..\lib\p3dc.lib>
+Creating command line "link.exe @c:\windows\TEMP\RSPD221.TMP" 
+Linking...
+LIBCD.lib(crt0init.obj) : warning LNK4098: defaultlib "libc.lib" conflicts with use of other libs; use /NODEFAULTLIB:library
+
+
+
+ModelTest.exe - 0 error(s), 1 warning(s)

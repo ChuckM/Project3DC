@@ -1,0 +1,181 @@
+#
+# Cube Faces
+#
+#           V5 +-------+ V6
+#             /|      /|
+#            / |     / |
+#           /  |    /  |
+#          /   |   /   |
+#         / V8 +--/----+ V7
+#        /    /  /    /
+#    V4 +-------+ V3 /
+#       |   /   |   /
+#       |  /    |  /
+#       | /     | /
+#       |/      |/
+#    V1 +-------+ V2
+
+model cube {
+    ORIGIN   0, 0, 0 ;
+    COLOR red =  0, 255, 0 ;
+    v V1 = -0.5, -0.5, -0.5 ;
+    v V2 =  0.5, -0.5, -0.5 ;
+    v V3 =  0.5,  0.5, -0.5 ;
+    v V4 = -0.5,  0.5, -0.5 ;
+    v V5 = -0.5,  0.5,  0.5 ;
+    v V6 =  0.5,  0.5,  0.5 ;
+    v V7 =  0.5, -0.5,  0.5 ;
+    v V8 = -0.5, -0.5,  0.5 ;
+    face (red) V1, v2, v3, v4; 
+    face (red) v2, v7, v6, v3;
+    face (red) v5, v6, v7, v8;
+    face (red) v4, v5, v8, v1;
+    face (red) v4, v3, v6, v5;
+    face (red) v1, v8, v7, v2;
+}
+
+
+# These are the models used by the model test
+# program.
+#
+#
+# This is our test model for the model test.
+#
+#
+# This first model is that of a paper airplane
+# of the kind most people learn to fold first.
+#
+model airplane {
+	color yellow = 235, 235, 0 ;
+	color green = 0, 235, 0 ;
+	# origin = 0, 0, 5.5;
+	vertex V0 = 0, 0, 0;
+	verte V1 = 0, 0, 11;
+# right wing (looking down)
+ 	vert V2 = 0.25, 1, 8.75 ;
+	ver V3 = 3.5, 0.5, 1;
+	ve V4 = 3.5, 0.5, 0;
+	v V5 = 0.25, 1, 0;
+	vertex V6 = 0.25, 1, 4.5;
+#
+	vertex V7 = 0, 0, 5;
+# left wing (looking down)
+	vertex V8 = -0.25, 1, 8.75;
+	vertex V9 = -3.5, 0.5, 1;
+	vertex V10 = -3.5, 0.5, 0;
+	vertex V11 = -0.25, 1, 0;
+	vertex V12 = -0.25, 1, 4.5;
+
+#
+# fuselage top
+#
+	face  (green) v1, v7, v6, v2 ;
+	fac  (green) v1, v8, v12, v7 ;
+	fa  (yellow) v7, v0, v5, v6 ;
+	f  (yellow) v7, v12, v11, v0;
+#
+# fuselage bottom
+#
+	color bottom1 = 100, 100, 235;
+	f (bottom1) v1, v0, v11, v8;
+	f (bottom1) v1, v2, v5, v0;
+
+# 
+# right wing (top)
+#
+	color blue = 0, 0, 200; 
+	f (green) v2, v6, v3 ;
+	f (yellow) v6, v5, v4, v3 ;
+	f (blue) v2, v3, v4, v5 ;
+
+# 
+# left wing (top)
+#
+	f (green) v8, v9, v12;
+	f (yellow) v12, v9, v10, v11;
+	f (blue) v8, v11, v10, v9;
+
+}
+# vertices for the built in coordinate axes
+	V li0 = 0, 0, -6 ;
+	V li1 = 0, 0, 6;
+	V li2 = 0.5, 0, 5;
+	V li3 = -0.5, 0, 5;
+	V li4 = 6, 0, -6;
+	V li5 = 5, -0.5, -6;
+	V li6 = 5,  0.5, -6;
+	V li7 = 0, 6, -6;
+	V li8 = -0.5, 5, -6;
+	V li9 =  0.5, 5, -6;
+	
+#
+# Blue arrow on the Z axis 
+#
+	color ablue = 0, 0, 235;
+	color ared = 235, 0, 0;
+	color agreen = 0, 235, 0;
+
+	li (ablue) li0, li1 ;
+	lin  (ablue) li2, li1;
+	li (ablue) li3, li1 ;
+#
+# Green arrow on the X axis
+#
+	l (agreen) li0, li4;
+	l (agreen) li4, li5;
+	l (agreen) li4, li6;
+#
+# Red arrow on the Y axis
+#
+	l (ared) li0, li7;
+	l (ared) li7, li8;
+	l (ared) li7, li9;
+}
+
+#
+# This is a Conical section, it has mostly blue
+# sides with some red panels and a grey panel.
+# it was generated automatically by a Java
+# program and then written out.
+#
+model "cone" {
+	color = 0, 0, 255 ;
+    V1 = 0.5, 0.0,  -0.5 ;
+    V2 = 0.46985, 0.171,  -0.5 ;
+    V3 = 0.383, 0.3214,  -0.5 ;
+    V4 = 0.25, 0.433,  -0.5 ;
+    V5 = 0.0868, 0.4924,  -0.5 ;
+    V6 = -0.0868, 0.4924,  -0.5 ;
+    V7 = -0.25, 0.433,  -0.5 ;
+    V8 = -0.383, 0.3214,  -0.5 ;
+    V9 = -0.46985, 0.171,  -0.5 ;
+    V10 = -0.5, 0.0,  -0.5 ;
+    V11 = -0.46985, -0.171,  -0.5 ;
+    V12 = -0.383, -0.3214,  -0.5 ;
+    V13 = -0.25, -0.433,  -0.5 ;
+    V14 = -0.0868, -0.4924,  -0.5 ;
+    V15 = 0.0868, -0.4924,  -0.5 ;
+    V16 = 0.25, -0.433,  -0.5 ;
+    V17 = 0.383, -0.3214,  -0.5 ;
+    V18 = 0.46985, -0.171,  -0.5 ;
+    V19 = 0, 0, 0.5;
+    Fbottom = (120, 200, 40) V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18 ;
+    F1 = (255,0,255) V19,  V2 [0.9397, 0.342, 0.443], V1 [1.0, 0.0, 0.443];
+    F2 = (0,0,255) V19,  V3 [0.766, 0.6428, 0.443], V2 [0.9397, 0.342, 0.443];
+    F3 = (0, 0,255) V19,  V4 [0.5, 0.866, 0.443], V3 [0.766, 0.6428, 0.443];
+    F4 = (255,0,255) V19,  V5 [0.1736, 0.9848, 0.443], V4 [0.5, 0.866, 0.443];
+    F5 = (0,0,255) V19,  V6 [-0.1736, 0.9848, 0.443], V5 [0.1736, 0.9848, 0.443];
+    F6 = (0,0,255) V19,  V7 [-0.5, 0.866, 0.443], V6 [-0.1736, 0.9848, 0.443];
+    F7 = (255,0,255) V19,  V8 [-0.766, 0.6428, 0.443], V7 [-0.5, 0.866, 0.443];
+    F8 = (0,0,255) V19,  V9 [-0.9397, 0.342, 0.443], V8 [-0.766, 0.6428, 0.443];
+    F9 = (0,0,255) V19,  V10 [-1.0, 0.0, 0.443], V9 [-0.9397, 0.342, 0.443];
+    F10 = (180,180,180) V19,  V11 [-0.9397, -0.342, 0.443], V10 [-1.0, 0.0, 0.443];
+    F11 = (0,0,255) V19,  V12 [-0.766, -0.6428, 0.443], V11 [-0.9397, -0.342, 0.443];
+    F12 = (0,0,255) V19,  V13 [-0.5, -0.866, 0.443], V12 [-0.766, -0.6428, 0.443];
+    F13 = (0,0,255) V19,  V14 [-0.1736, -0.9848, 0.443], V13 [-0.5, -0.866, 0.443];
+    F14 = (0, 0,255) V19,  V15 [0.1736, -0.9848, 0.443], V14 [-0.1736, -0.9848, 0.443];
+    F15 = (0,0,255) V19,  V16 [0.5, -0.866, 0.443], V15 [0.1736, -0.9848, 0.443];
+    F16 = (0,0,255) V19,  V17 [0.766, -0.6428, 0.443], V16 [0.5, -0.866, 0.443];
+    F17 = (0,0,255) V19,  V18 [0.9397, -0.342, 0.443], V17 [0.766, -0.6428, 0.443];
+    F18 = (0,0,255) V19,  V1 [1.0, 0.0, 0.443], V18 [0.9397, -0.342, 0.443];
+}

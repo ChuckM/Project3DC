@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<title>Project: 3D Craft -- Point data structures</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Project: 3D Craft -- Point data structures.</h1>
+
+<p>The P3DC point types are <strong>p3dc_PNT2</strong>, <strong>p3dc_PNT3</strong>,
+and <strong>p3dc_PNT4</strong>. They represent 1x2, 1x3 and 1x4
+element matrices respectively. There are several functions
+defined that operate on these data structures however they are
+primarily implemented as #define statements in the p3dc.h include
+file.</p>
+
+<p>The following functions are described in this document:</p>
+
+<ul>
+    <li><a href="#scaleXX">scaleXX</a> -- scaleP2, scaleP3, and
+        scaleP4</li>
+    <li><a href="#interceptXX">interceptXX</a> -- interceptP2,
+        interceptP3, interceptP4</li>
+    <li><a href="#p3dc_dot_pnt3">p3dc_dot_pnt3</a></li>
+    <li><a href="#p3dc_diff_pnt3">p3dc_diff_pnt3</a></li>
+    <li><a href="#p3dc_cross_pnt3">p3dc_cross_pnt3</a></li>
+</ul>
+
+<hr>
+
+<p>The defined functions are as follows.</p>
+
+<p><em>p3dc_FLOAT </em><a name="scaleXX"><strong>scale</strong><em><strong>XX</strong></em></a><strong>(</strong><em>var</em>,
+<em>scalar</em><strong>)</strong></p>
+
+<blockquote>
+    <p>Where the value <em>XX</em> is one of <strong>P2</strong>,
+    <strong>P3</strong>, or <strong>P4</strong>. This function
+    multiplies a two, three, or four component vector
+    respectively by a scalar value.</p>
+</blockquote>
+
+<p><em>void </em><a name="interceptXX"><strong>intercept</strong><em><strong>XX</strong></em></a><strong>(</strong><em>first_endpoint,
+second_endpoint, dT</em>, <em>result_endpoint</em><strong>)</strong></p>
+
+<blockquote>
+    <p>Again where the value of <em>XX</em> is one of <strong>P2</strong>,
+    <strong>P3</strong>, or <strong>P4</strong>. This function
+    computes the value of a point along a line segment using the
+    value <em>dT</em> to determine the result endpoint. These
+    functions are used in the clipping code when clipping
+    polygons.</p>
+</blockquote>
+
+<p><em>p3dc_FLOAT </em><a name="p3dc_dot_pnt3"><strong>p3dc_dot_pnt3</strong></a><strong>(</strong><em>vector_a</em>,
+<em>vector_b</em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function computes the dot product (scalar product) of
+    two three element vectors. It is returned as a floating point
+    value. Note that the statement <br>
+    <!--webbot bot="HTMLMarkup" startspan -->&nbsp;&nbsp;&nbsp;&nbsp;<!--webbot
+    bot="HTMLMarkup" endspan --><font face="Courier New">scaleP3(vec,
+    1/p3dc_dot_pnt3(vec, vec))</font> <br>
+    normalizes the vector to unit length.</p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_diff_pnt3"><strong>p3dc_diff_pnt3</strong></a><strong>(</strong><em>vector_a,
+vector_b, result_vector</em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function computes the vector difference <strong>R</strong>
+    = <strong>B</strong> - <strong>A</strong>. Effectively this
+    stores in result a vector, then when added to <strong>A</strong>
+    will give you <strong>B</strong>. </p>
+</blockquote>
+
+<p><em>void </em><a name="p3dc_cross_pnt3"><strong>p3dc_cross_pnt3</strong></a><strong>(</strong><em>vector_a</em>,
+<em>vector_b</em>, <em>result_vector</em><strong>)</strong></p>
+
+<blockquote>
+    <p>This function finds the cross product (vector product) of
+    the vectors <strong>A</strong> and <strong>B</strong>.
+    Mathematically this is written as <strong>R = A X B</strong>.
+    This function is great for finding a plane normal if you have
+    three points.</p>
+</blockquote>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+</body>
+</html>

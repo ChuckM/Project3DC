@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach i (src/lib/*.c)
+	diff -cb $i ../$i
+end
+exit 0

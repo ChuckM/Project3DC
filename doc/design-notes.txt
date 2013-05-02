@@ -1,0 +1,327 @@
+Design Notes for P3DC -- Chuck McManis
+--------------------
+25-oct-1999
+More camera stuff. There is now a complete set of camera motion
+APIs and when I get a pathing system built it will be possible
+to "fly" cameras around fixed paths. I had the very unusual experience
+of overdriving the Voodoo card, computers are too fast these days I guess.
+
+I've redesigned the camera datastructure to hold three transforms, a
+world-to-view transform, a view-to-screen transform, and the combined
+world-to-screen final transform. The reasoning was that if you
+recomputed one or the other, you didn't want to force the
+recomputation of the other one. (which was being done in _compute_P()
+all the time.) There are also a couple of functions for "setting"
+either of these transforms from user code, which allows for special
+effects.
+
+At somepoint I simplified the list description from below to just two
+types. (Linked and sorted) but I also need to add some #defines for
+appending to lists and inserting to lists. The general purpose
+functions are too wordy and I don't want to pay a function call to add
+an abstraction layer.
+
+22-sep-1999
+Camera work in progress. Added some new camera functions and I
+need to normalize the interface to cameras and such. There is
+probably a tutorial in there somewhere talking about just what
+exactly are you looking at and how. It gets really confusing
+when there aren't enough anchors, things like "how far is a unit?"
+How big is a camera? Where is the near plane with respect to
+the camera?
+
+30-aug-1999
+
+This file can't capture what is written down in my notebook which is 
+handwritten of course. That's too bad since I lose data between here
+and there sometimes.
+
+LISTS - I start writing the documentation on lists and realize they
+are in a complete jumble. This occurs of course because they were
+half written at the beginning of the project and later written at the
+end the project. I've concluded I need three lists and types for each.
+These are :
+	SINGLY_LINKED	-- best performance (default)
+	DOUBLY_LINKED	-- allows better searching
+	RED-BLACK		-- Sortable by 'name.'
+
+Then there are the methods on lists, we know there are :
+	new		-- allocate a new empty list
+	free 	-- de-allocate  a possibly non-empty list
+	init	-- initialize a new list to be empty
+	add		-- Add a node to a list:
+				-- HEAD (at the front)
+				-- END	(at the end of the list)
+				-- INSERT (sorted insertion)
+				-- DEFAULT (default behavior)
+	remove	-- Remove a node from the list
+				-- FIRST
+				-- LAST
+				-- NAMED
+				-- CONTAINING
+	lookup	-- Find a node on this list
+				-- NAMED 
+				-- CONTAINING
+
+List invariants we want to enforce:
+	A node lives on exactly one list.
+	A list with a specified type has only nodes of that type on it.
+	Nodes in use do not appear on the free list.
+
+
+10-Aug-1999
+
+I've been updating the model definition language and that has called for
+some updates in the way that things are stored. In particular faces.
+
+Faces will have a new texture structure that contains the "name" of the
+texture and a linkage to the texture data structure (this latter
+structure is simply a void pointer and a flags word) When the model is
+composed, the texture data pointer will be bound to the texture data
+structure. When the model is textured the texture data structure will be
+bound to a hardware specific texture.
+
+Textures don't need a name since they are bound at model parse time.
+
+-----------------------------------------------
+Rediscovering the Drawing pipeline.
+
+As an engine G3D is not going very far. In particular there aren't any
+plans to commercialize this particular engine. I'll try to keep it
+educational however.
+
+The Drawing Pipeline is central to the system, it goes something like
+this:
+    1) p3dc_prepare_frame()
+    2) draw stuff
+    3) p3dc_flip_frame()
+
+
+--------------------
+TODO List:
+
+1) Now that Clipping is tested, go through and clean up the
+   clip.c file.
+   
+2) Add some textures because that would make for cool demos.
+
+3) Add DirectInput support so that the joystick can be accessed.
+
+4) Create the standard models.
+
+5) Re-create the console code (higher priority?)
+
+6) Docs of course : function specification
+
+7) Flocking demo.
+
+8) Maze War (using eyeball) could use another VooDoo
+
+
+_____________________
+
+Models, the model file format contains a fairly simple specification
+language as follows:
+
+MODEL ::=	MODEL name { STATEMENTS }
+STATEMENT ::=	TYPE = TYPE-STRING ;
+POINT_STATEMENT	::=	Pnnnn = [ COLOR_SPEC ] Vnnnn ;
+LINE_STATEMENT ::= Lnnnn = [ COLOR_SPEC ] Vnnnn Vnnnn ;
+FACE_STATEMENT	::= Fnnnn = [ TEXTURE_STATEMENT ] Vnnnn [ NORMAL ] [TXCOORDS]
+ORIGIN_STATEMENT	::= ORIGIN = num , num, num ;
+COLOR_STATEMENT		::= COLOR = num, num, num ; 
+
+Models are built up as :
+	Red/Black tree of Vertices
+	List of Parts
+	List of Textures
+	Base Color
+
+
+When reading new models:
+	1) Look up the model in 'stdmodels' if it doesn't exist
+	   then try reading "model-name.p3dc"
+	2) If reading the file succeeds, add the model to the list
+	   of models.
+
+Model texture demo should have cube with a texture and light map such
+that it shows a window into the cube with perhaps people inside.
+
+==========
+Model file format :
+
+#
+# comments
+#
+model "cube" {
+	V1 = x, y, z;
+	v2 = x, y, z;
+	p1 = v1 ;
+	p2 = v2;
+}
+
+#
+# comment
+#
+...
+
+=================================================
+Currently implemented model description language :
+
+MODEL				::=	"model" NAME MODEL-BODY
+MODEL_BODY			::= "{" STATEMENT* "}"
+STATEMENT			::=	ORIGIN_STATEMENT	|
+						COLOR_STATEMENT		|
+						VERTEX_STATEMENT	|
+						TEXTURE_STATEMENT	|
+						POINT_STATEMENT		|
+						LINE_STATEMENT		|
+						FACE_STATEMENT
+ORIGIN_STATEMENT	::= "origin =" CONSTANT , CONSTANT , CONSTANT ";"
+COLOR_STATEMENT		::= "color =" COLOR_TUPLE ";" 
+VERTEX_STATEMENT	::= VERTEX_NAME "=" CONSTANT, CONSTANT, CONSTANT ";"
+TEXTURE_STATEMENT	::= TEXTURE_NAME "=" FILE_SPECIFICATION [ ", wrap" ] ";"
+POINT_STATEMENT		::= POINT_NAME "=" [ "(" COLOR_TUPLE ")" ] VERTEX_NAME ";"
+LINE_STATEMENT		::= LINE_NAME "=" [ "(" COLOR_TUPLE ")" ] VERTEX_NAME "," 
+															  VERTEX_NAME ";"
+FACE_STATEMENT		::= FACE_NAME ["," TEXTURE_SPEC]* "=" 
+							[ "(" COLOR_TUPLE ")" ] VERTEX_SPEC "," 
+							VERTEX_SPEC "," VERTEX_SPEC [ "," VERTEX_SPEC]* ";"
+TEXTURE_SPEC		::= "<" TEXTURE_NAME ["," ( "lightmap" | "detail")] ">"
+VERTEX_SPEC			::= VERTEX_NAME [ NORMAL_SPEC ] [ TEXTURE_COORD ]*
+NORMAL_SPEC			::= "[" CONSTANT "," CONSTANT "," CONSTANT "]"
+VERTEX_NAME			::= "v" NAME
+POINT_NAME			::= "p" NAME
+TEXTURE_NAME		::= "t" NAME
+FACE_NAME			::= "f" NAME
+NAME				::= character string < 63 characters long
+COLOR_TUPLE			::= RED "," GREEN "," BLUE [ "," ALPHA ] 
+RED					::= COLOR_CONSTANT
+GREEN				::= COLOR_CONSTANT
+BLUE				::= COLOR_CONSTANT
+ALPHA				::= COLOR_CONSTANT
+COLOR_CONSTANT		::= 0 <= CONSTANT <= 255.0
+CONSTANT			::= floating point number
+
+-----------------------------------------------------------
+
+State information and the pipeline...
+
+Mats Grahm on model clipping ...
+
+Alexander Herz wrote:
+
+> I don't get that....
+> do you mean (camera position-vertex)..and what to do with that vec?
+>
+> I do :
+> if(dotmult(face_normal,camera_direction)<0)face is culled....
+> what do ya mean???
+
+Using the camera direction will only work in the central part of the screen. At
+the edges, the direction to the point in question is clearly not parallel to the
+view direction.
+
+So try :
+if(dotmult(face_normal, vertex_coord - camera_position)<0) instead.
+
+/mats
+
+
+--------- Mats Grahm on texture management
+
+Russell Bornschlegel wrote:
+
+> - Multibase textures sound like a nightmare to keep track of. Essentially, I
+> think you'd have to generalize it to the point where every texture was
+> considered multibased. If memory is really that tight, you're going to have to
+> do some swapping anyway. Remember that throwing out a few top-level mipmaps - or
+> just reining in the tendency to use 256x256 textures for everything - can save
+> you way more memory than eliminating  fragmentation.
+
+I have written a multibase texture manager. Of course it got a bit more
+complicated than had I not used multibasing. But hardly a nightmare. And it has
+some advantages:
+
+- Like you, I too use texture quality as a parameter. To make room for a new
+texture, I can throw out only the highest mipmap level of some little used
+texture. But by using multibased addressing, I can reload this level as soon as I
+have enough memory. Without rearranging any other textures.
+
+- Mipmapped textures have very odd sizes so fragmentation can become a problem.
+The individual mipmap levels on the other hand have very nice and even sizes. Very
+often, a hole after one mipmap level is exactly enough for 1, 2, 4 or 8 other
+blocks, even if textures differ in size, aspect ratio or bits per pixel.
+
+- The fourth block with mipmap levels 32 to 1 is however both small and odd sized.
+Mixing these types of blocks with the others would cause lots of fragmentation. In
+my manager, I therefore search the free list from the beginning when allocating
+mipmap levels 256 to 64, but from the high end when allocating the odd-sized
+32-to-1 blocks. In both cases, I use first fit.
+
+/mats
+
+
+Nemesis wrote:
+
+> Is it possible that your 256x256 holes can get filled by 64x64 mipmap
+> levels?
+> At a certain stage no 256x256 texture could be loaded because there are only
+> lower mipmap levels which have a higher priority.
+>
+> Maybe it's a good idea to only use 256x256 levels when textures are really
+> important,
+> else just use up to 128x128?
+
+I'm not sure I understand what you mean. As long as there are plenty of room in
+texture memory, my manager happily loads whatever you ask it to load. Same if
+texture memory is full, but some textures have been idle for some time.
+
+The only time this "prioritizing" takes place is when texture memory is full,
+and all downloaded textures still are "live". Then some little used textures may
+have to do without their highest mip-map levels.
+
+Although I did not mention it earlier, there is also defragmentation built in.
+If a lot of trashing occurs (textures constantly swapped in and out), and there
+*is* some unused space left in small holes, the manager will flush the entire
+texture memory, hoping that the working set of textures will be tighter packed
+if loaded in anew. This will of course make the game freeze for a moment, but it
+is only used as a last resort.
+
+/mats
+
+========== RCS Data ---
+
+$Id: design-notes.txt,v 1.3 1999-10-31 11:23:52-08 cmcmanis Exp cmcmanis $
+
+Change Log:
+$Log: design-notes.txt,v $
+Revision 1.3  1999-10-31 11:23:52-08  cmcmanis
+Camera rewrite is nearly complete. This seems like a logical
+milestone
+
+Revision 1.2  1999/09/02 04:37:37  cmcmanis
+The list rewrite, added some new docs
+
+Revision 1.1  1999/08/18 01:32:52  cmcmanis
+Initial revision
+
+Revision 1.5  1999/07/26 03:11:45  cmcmanis
+Updated with the new names (mostly)
+
+Revision 1.4  1998/11/08 07:45:45  cmcmanis
+Update after the big source move
+
+Revision 1.4  1998/11/08 05:23:23  cmcmanis
+Outdated (renamed to 'H:\P3DC-RCS\doc\design-notes.txt,v').
+
+Revision 1.3  1998/11/05 20:23:49  cmcmanis
+Checkin prior to moving into a better source tree structure
+
+Revision 1.2  1998/10/13 21:04:11  cmcmanis
+Model parsing and basic drawing is checked out. The model positioning
+code and relighting code still needs work.
+
+Revision 1.1  1998/10/08 08:33:57  cmcmanis
+Initial revision
+
